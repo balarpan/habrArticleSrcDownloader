@@ -74,6 +74,7 @@ class habrArticleSrcDownloader():
         with open(name + ".html", "w", encoding="UTF-8") as fd:
             fd.write('<html><head>\n')
             fd.write('<link rel="stylesheet" href="js/habr.css">\n')
+            fd.write('<script src="js/habr.js"></script>\n')
             fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
             fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
             fd.write(f'<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">{name}</h1>')
