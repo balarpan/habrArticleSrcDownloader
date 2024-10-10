@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import os
+import shutil
 import argparse
 import re
 import pymp
@@ -13,6 +14,9 @@ import math
 
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import warnings
+from bs4 import XMLParsedAsHTMLWarning
+warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
@@ -52,6 +56,15 @@ class habrArticleSrcDownloader():
             except OSError:
                 print("[error]: Ошибка создания директории: {}".format(dir))
 
+    def copy_highlightjs(self, dir):
+        # скопируем в папку dir библиотеки highlightjs
+        ddir = os.path.join(dir,'highlightjs')
+        if not os.path.exists(ddir):
+            shutil.copytree(
+                os.path.join(os.path.dirname(os.path.realpath(__file__)), 'highlightjs'),
+                ddir,
+                dirs_exist_ok=True)
+
     def save_md(self, name: str, text: str):
         with open(name + ".md", "w", encoding="UTF-8") as fd:
             fd.write(f'# {name}\n')
@@ -59,8 +72,13 @@ class habrArticleSrcDownloader():
 
     def save_html(self, name: str, text: str):
         with open(name + ".html", "w", encoding="UTF-8") as fd:
+            fd.write('<html><head>\n')
+            fd.write('<link rel="stylesheet" href="highlightjs/stackoverflow-light.min.css">\n')
+            fd.write('<script src="highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
             fd.write(f'<h1>{name}</h1>')
             fd.write(text)
+            fd.write('\n<script>hljs.highlightAll();</script>\n</body></html>')
+        self.copy_highlightjs('.')
 
     def save_comments(self, name: str, text: str):
         lst = text.split('\n')
@@ -84,6 +102,8 @@ class habrArticleSrcDownloader():
             return markdownify.markdownify(str(url_soup), heading_style="ATX", code_language_callback=callback)
 
     def get_article(self, url, name=None):
+        if not args.quiet:
+            print(f"[info]: Скачиваем {url}")
         try:
             r = requests.get(url)
         except requests.exceptions.RequestException:
@@ -98,7 +118,7 @@ class habrArticleSrcDownloader():
         video = url_soup.findAll('div', {'class': 'tm-iframe_temp'})
 
         # одиночное скачивание статьи
-        if name is None:
+        if name is None or 's':
 
             habrSD.create_dir(DIR_SINGLES)
             os.chdir(DIR_SINGLES)
@@ -115,7 +135,7 @@ class habrArticleSrcDownloader():
                 article_createtime = url_soup.find('span',
                                                    {'class': 'tm-article-datetime-published'}).find('time').get('title')
                 article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/')
-                text += f"<p>Url: {url}</p>\n<p>Author: {article_author[len(article_author) - 2]}</p>\n<p>Date: {article_createtime}</p>\n"
+                text += f"<p>Url: <a href='{url}'>{url}</a></p>\n<p>Author: {article_author[len(article_author) - 2]}</p>\n<p>Date: {article_createtime}</p>\n"
             except:
                 print("[error]: Ошибка получения метаданных статьи: ", url)
 
@@ -130,7 +150,8 @@ class habrArticleSrcDownloader():
             text += str(post)
 
         text_md = markdownify.markdownify(text, heading_style="ATX", code_language_callback=callback)
-        text_html = text.replace("<pre><code class=", "<source lang=").replace("</code></pre>", "</source>")
+        # text_html = text.replace("<pre><code class=", "<source lang=").replace("</code></pre>", "</source>")
+        text_html = text
 
         # создаем дирректорию под картинки
         self.create_dir(DIR_PICTURE)
@@ -282,6 +303,7 @@ if __name__ == '__main__':
     else:
         output_name = args.article_id
         type_articles = 's'
+        output = DIR_SINGLES
 
     habrSD = habrArticleSrcDownloader()
     try:
