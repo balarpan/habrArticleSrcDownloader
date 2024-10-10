@@ -56,12 +56,12 @@ class habrArticleSrcDownloader():
             except OSError:
                 print("[error]: Ошибка создания директории: {}".format(dir))
 
-    def copy_highlightjs(self, dir):
+    def copy_jsdir(self, dir):
         # скопируем в папку dir библиотеки highlightjs
-        ddir = os.path.join(dir,'highlightjs')
+        ddir = os.path.join(dir,'js')
         if not os.path.exists(ddir):
             shutil.copytree(
-                os.path.join(os.path.dirname(os.path.realpath(__file__)), 'highlightjs'),
+                os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js'),
                 ddir,
                 dirs_exist_ok=True)
 
@@ -73,12 +73,13 @@ class habrArticleSrcDownloader():
     def save_html(self, name: str, text: str):
         with open(name + ".html", "w", encoding="UTF-8") as fd:
             fd.write('<html><head>\n')
-            fd.write('<link rel="stylesheet" href="highlightjs/stackoverflow-light.min.css">\n')
-            fd.write('<script src="highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
-            fd.write(f'<h1>{name}</h1>')
+            fd.write('<link rel="stylesheet" href="js/habr.css">\n')
+            fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
+            fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
+            fd.write(f'<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">{name}</h1>')
             fd.write(text)
-            fd.write('\n<script>hljs.highlightAll();</script>\n</body></html>')
-        self.copy_highlightjs('.')
+            fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
+        self.copy_jsdir('.')
 
     def save_comments(self, name: str, text: str):
         lst = text.split('\n')
@@ -119,14 +120,7 @@ class habrArticleSrcDownloader():
 
         # одиночное скачивание статьи
         if name is None or 's':
-
-            habrSD.create_dir(DIR_SINGLES)
-            os.chdir(DIR_SINGLES)
-
             name = self.dir_cor_name(url_soup.find('h1', 'tm-title tm-title_h1').string)
-
-            self.create_dir(name)
-            os.chdir(name)
 
         text = ''
 
@@ -135,7 +129,9 @@ class habrArticleSrcDownloader():
                 article_createtime = url_soup.find('span',
                                                    {'class': 'tm-article-datetime-published'}).find('time').get('title')
                 article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/')
-                text += f"<p>Url: <a href='{url}'>{url}</a></p>\n<p>Author: {article_author[len(article_author) - 2]}</p>\n<p>Date: {article_createtime}</p>\n"
+                text += f"<div class='dl-info'>\
+                <p>Url: <a href='{url}'>{url}</a></p>\n<p>Author: <strong>{article_author[len(article_author) - 2]}</strong></p>\n<p>Date: {article_createtime}</p>\n\
+                </div>"
             except:
                 print("[error]: Ошибка получения метаданных статьи: ", url)
 
@@ -187,7 +183,7 @@ class habrArticleSrcDownloader():
                     print("[error]: Ошибка получения картинки: ", link.get('data-src'))
 
     def save_video(self, video):
-        with open('video.txt', 'w') as f:
+        with open('video.txt', 'w+') as f:
             for link in video:
                 if link.get('data-src'):
                     print(link.get('data-src'), file=f)
@@ -227,7 +223,7 @@ class habrArticleSrcDownloader():
                 try:
                     r = requests.get(url + "page" + str(page))
                 except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения статей: ", url)
+                    print("[error]: Ошибка получения последующих страниц постов из статьи: ", url)
                     return
 
                 url_soup = BeautifulSoup(r.text, 'lxml')
@@ -286,7 +282,7 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-u', help="Скачать статьи пользователя", type=str, dest='user_name_for_articles')
     group.add_argument('-f', help="Скачать закладки пользователя", type=str, dest='user_name_for_favorites')
-    group.add_argument('-s', help="Скачать одиночную статью", type=str, dest='article_id')
+    group.add_argument('-s', help="Скачать одиночные статьи (список ID через запятую)", type=str, dest='article_id')
 
     args = parser.parse_args()
 
@@ -310,7 +306,18 @@ if __name__ == '__main__':
         if not args.article_id:
             habrSD.main("https://habr.com/ru/users/" + output_name, output, type_articles)
         else:
-            habrSD.get_article("https://habr.com/ru/post/" + output_name, type_articles)
+            if not os.path.exists(DIR_SINGLES):
+                try:
+                    os.makedirs(DIR_SINGLES)
+                    if not args.quiet:
+                        print("[info]: Директория: {} создана".format(DIR_SINGLES))
+                except OSError:
+                    print("[error]: Ошибка создания директории: {}".format(DIR_SINGLES))
+                    raise SystemExit
+            os.chdir(DIR_SINGLES)
+            for ar_id in args.article_id.split(','):
+                habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles)
+            # habrSD.get_article("https://habr.com/ru/post/" + output_name, type_articles)
     except Exception as ex:
         print("[error]: Ошибка получения данных от :", output_name)
         print(ex)
