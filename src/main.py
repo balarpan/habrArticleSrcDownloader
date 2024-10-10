@@ -172,16 +172,19 @@ class habrArticleSrcDownloader():
 
     def save_pictures(self, pictures):
         for link in pictures:
-            if link.get('data-src'):
+            # для svg (формулы LaTeX) и др. data-src не проставлен
+            link_url = link.get('data-src') or link.get('src')
+            if link_url:
+                link_dst = os.path.basename(urlparse(link_url).path)
+                # если картинка уже создана, то второй раз не скачиваем
+                if os.path.exists(link_dst):
+                    continue
                 try:
-                    img_data = requests.get(link.get('data-src')).content
-
-                    a = urlparse(link.get('data-src'))
-
-                    with open(os.path.basename(a.path), 'wb') as handler:
+                    img_data = requests.get(link_url).content
+                    with open(link_dst, 'wb') as handler:
                         handler.write(img_data)
                 except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения картинки: ", link.get('data-src'))
+                    print("[error]: Ошибка получения картинки: ", link_url)
 
     def save_video(self, video):
         with open('video.txt', 'w+') as f:

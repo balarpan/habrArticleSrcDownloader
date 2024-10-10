@@ -80,14 +80,6 @@ div.dl-info a:hover {text-decoration: underline;}
     line-height: 1.56;
     overflow-wrap: break-word;
 }
-.article-formatted-body h1, .article-formatted-body h2, .article-formatted-body h3, .article-formatted-body h4, .article-formatted-body h5, .article-formatted-body h6 {
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    font-family: Fira Sans, sans-serif;
-    font-weight: 500;
-    margin: 0;
-    padding: 0;
-}
 .article-formatted-body h1, .article-formatted-body h2 {
     font-size: 1.25rem;
     line-height: 1.625rem;
@@ -150,6 +142,78 @@ div.dl-info a:hover {text-decoration: underline;}
     padding: 0;
 }
 
+/* TABLE */
+.article-formatted-body .table_wrapped {
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.article-formatted-body .table_wrapped {
+  margin-bottom:24px;
+  overflow-x:auto
+}
+.article-formatted-body table {
+  border:1px solid #C0C0C0;
+  border-collapse:collapse;
+  margin:1.5em 0;
+  min-width:100%;
+  table-layout:fixed;
+  width:auto;
+  word-break:normal
+}
+.article-formatted-body table caption {
+  text-align:left;
+  text-indent:1em
+}
+.article-formatted-body table td,
+.article-formatted-body table th {
+  border:1px solid #C0C0C0;
+  line-height:1.5;
+  padding:6px 12px 9px;
+  vertical-align:top
+}
+.article-formatted-body table td img,
+.article-formatted-body table th img {
+  height:auto;
+  max-width:100%
+}
+
+/*ol, li */
+.article-formatted-body ol li,
+.article-formatted-body ol ol li,
+.article-formatted-body ol ul li,
+.article-formatted-body ul li,
+.article-formatted-body ul ol li,
+.article-formatted-body ul ul li {
+  line-height:1.6;
+  margin:6px 0;
+  padding:0
+}
+.article-formatted-body ol li:first-child,
+.article-formatted-body ol ol li:first-child,
+.article-formatted-body ol ul li:first-child,
+.article-formatted-body ul li:first-child,
+.article-formatted-body ul ol li:first-child,
+.article-formatted-body ul ul li:first-child {
+  margin-top:0
+}
+.article-formatted-body ol li:last-child,
+.article-formatted-body ol ol li:last-child,
+.article-formatted-body ol ul li:last-child,
+.article-formatted-body ul li:last-child,
+.article-formatted-body ul ol li:last-child,
+.article-formatted-body ul ul li:last-child {
+  margin-bottom:0
+}
+.article-formatted-body ol,
+.article-formatted-body ul {
+  padding-inline-start:32px
+}
+.article-formatted-body ol ol,
+.article-formatted-body ol ul,
+.article-formatted-body ul ol,
+.article-formatted-body ul ul {
+  margin-top:9px
+}
 
 /* spoiler  */
 .article-formatted-body_version-1 .spoiler .spoiler_title {
@@ -203,6 +267,74 @@ div.dl-info a:hover {text-decoration: underline;}
 
 .article-formatted-body_version-1 .spoiler_open>.spoiler_text {
     display: block
+}
+
+
+.article-formatted-body h1,
+.article-formatted-body h2,
+.article-formatted-body h3,
+.article-formatted-body h4,
+.article-formatted-body h5,
+.article-formatted-body h6 {
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-font-smoothing:antialiased;
+  font-family:Fira Sans,sans-serif;
+  font-weight:500;
+  margin:0;
+  padding:0
+}
+.article-formatted-body h1 a,
+.article-formatted-body h2 a,
+.article-formatted-body h3 a,
+.article-formatted-body h4 a,
+.article-formatted-body h5 a,
+.article-formatted-body h6 a {
+  text-decoration:none
+}
+.article-formatted-body h1 a:active,
+.article-formatted-body h1 a:hover,
+.article-formatted-body h2 a:active,
+.article-formatted-body h2 a:hover,
+.article-formatted-body h3 a:active,
+.article-formatted-body h3 a:hover,
+.article-formatted-body h4 a:active,
+.article-formatted-body h4 a:hover,
+.article-formatted-body h5 a:active,
+.article-formatted-body h5 a:hover,
+.article-formatted-body h6 a:active,
+.article-formatted-body h6 a:hover {
+  color: #548EAA
+}
+.article-formatted-body h1 b,
+.article-formatted-body h1 strong,
+.article-formatted-body h2 b,
+.article-formatted-body h2 strong,
+.article-formatted-body h3 b,
+.article-formatted-body h3 strong,
+.article-formatted-body h4 b,
+.article-formatted-body h4 strong,
+.article-formatted-body h5 b,
+.article-formatted-body h5 strong,
+.article-formatted-body h6 b,
+.article-formatted-body h6 strong {
+  font-weight:inherit
+}
+.article-formatted-body h1 code,
+.article-formatted-body h2 code,
+.article-formatted-body h3 code,
+.article-formatted-body h4 code,
+.article-formatted-body h5 code,
+.article-formatted-body h6 code {
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-font-smoothing:antialiased;
+  font-family:Fira Sans,sans-serif;
+  font-size:.9375rem;
+  font-weight:500
+}
+.article-formatted-body:after {
+  content:"";
+  display:block;
+  clear:both
 }
 
 
