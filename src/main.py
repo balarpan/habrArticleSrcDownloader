@@ -40,6 +40,7 @@ class habrArticleSrcDownloader():
         self.dir_author = ''
         self.posts = []
         self.comments = None
+        self.dwnl_data = ''
 
     def dir_cor_name(self, _str):
         for ch in ['#', '%', '&', '{', '}', '\\', '?', '<', '>', '*', '/', '$', '‘', '“', ':', '@', '`', '|']:
@@ -77,7 +78,7 @@ class habrArticleSrcDownloader():
             fd.write('<script src="js/habr.js"></script>\n')
             fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
             fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
-            fd.write(f'<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">{name}</h1>')
+            fd.write(self.dwnl_data + f'<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">{name}</h1>')
             fd.write(text)
             fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
         self.copy_jsdir('.')
@@ -128,13 +129,18 @@ class habrArticleSrcDownloader():
         if args.meta_information:
             try:
                 article_createtime = url_soup.find('span',
-                                                   {'class': 'tm-article-datetime-published'}).find('time').get('title')
-                article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/')
-                text += f"<div class='dl-info'>\
-                <p>Url: <a href='{url}'>{url}</a></p>\n<p>Author: <strong>{article_author[len(article_author) - 2]}</strong></p>\n<p>Date: {article_createtime}</p>\n\
-                </div>"
+                                                   {'class': 'tm-article-datetime-published'}).find('time').get('title') or ''
+                article_createtime = article_createtime.replace(",", "", 1)
+                article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/') or ''
+                
+                self.dwnl_data = f"\n<div class='dl-info'>\
+                <p>Url: <a href='{url}'>{url}</a></p>\n<p>Author: <strong>{article_author[len(article_author) - 2]}</strong></p>\n\
+                <p>Date: <time datetime='{article_createtime}'>{article_createtime}</time></p>\n\
+                </div>\n"
             except:
                 print("[error]: Ошибка получения метаданных статьи: ", url)
+        else:
+            self.dwnl_data = ''
 
         for post in posts:
             if args.local_pictures:
