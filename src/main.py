@@ -58,7 +58,7 @@ class habrArticleSrcDownloader():
                 print("[error]: Ошибка создания директории: {}".format(dir))
 
     def copy_jsdir(self, dir):
-        # скопируем в папку dir библиотеки highlightjs
+        # скопируем в папку dir файлы js и css если это не было сделано ранее
         ddir = os.path.join(dir,'js')
         if not os.path.exists(ddir):
             shutil.copytree(
@@ -166,7 +166,7 @@ class habrArticleSrcDownloader():
             # создаем дирректорию под видео
             self.create_dir(DIR_VIDEO)
             os.chdir(DIR_VIDEO)
-            self.save_video(video)
+            self.save_video(video, name)
             os.chdir('../')
 
         self.save_html(name, text_html)
@@ -193,11 +193,11 @@ class habrArticleSrcDownloader():
                 except requests.exceptions.RequestException:
                     print("[error]: Ошибка получения картинки: ", link_url)
 
-    def save_video(self, video):
+    def save_video(self, video, article_name):
         with open('video.txt', 'w+') as f:
             for link in video:
                 if link.get('data-src'):
-                    print(link.get('data-src'), file=f)
+                    print(link.get('data-src'), ' | ', article_name, file=f)
 
     def define_numer_of_pages(self, url, type_articles):
         r = requests.get(url)
@@ -234,7 +234,7 @@ class habrArticleSrcDownloader():
                 try:
                     r = requests.get(url + "page" + str(page))
                 except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения последующих страниц постов из статьи: ", url)
+                    print("[error]: Ошибка получения последующих страниц из списка статей: ", url)
                     return
 
                 url_soup = BeautifulSoup(r.text, 'lxml')
