@@ -73,7 +73,8 @@ class habrArticleSrcDownloader():
 
     def save_html(self, name: str, text: str):
         with open(name + ".html", "w", encoding="UTF-8") as fd:
-            fd.write('<html><head>\n')
+            fd.write(f"<html><head>\n<title>{name}</title>\n")
+            fd.write('<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">\n')
             fd.write('<link rel="stylesheet" href="js/habr.css">\n')
             fd.write('<script src="js/habr.js"></script>\n')
             fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
