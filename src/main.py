@@ -105,7 +105,7 @@ class habrArticleSrcDownloader():
 
             return markdownify.markdownify(str(url_soup), heading_style="ATX", code_language_callback=callback)
 
-    def get_article(self, url, name=None):
+    def get_article(self, url, name=None) -> str:
         if not args.quiet:
             print(f"[info]: Скачиваем {url}")
         try:
@@ -177,6 +177,7 @@ class habrArticleSrcDownloader():
 
         if not args.quiet:
             print(f"[info]: Статья: {name} сохранена")
+        return name
 
     def save_pictures(self, pictures):
         for link in pictures:
@@ -328,8 +329,18 @@ if __name__ == '__main__':
                     print("[error]: Ошибка создания директории: {}".format(DIR_SINGLES))
                     raise SystemExit
             os.chdir(DIR_SINGLES)
+            art_list = []
             for ar_id in args.article_id.split(','):
-                habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles)
+                art_list.append(habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles))
+            if len(art_list) > 1:
+                with open("index.html", "w", encoding="UTF-8") as fd:
+                    fd.write('<html><head>\n')
+                    fd.write('<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">\n')
+                    fd.write('<link rel="stylesheet" href="js/habr.css">\n</head><body>\n')
+                    fd.write('<div class="art_index_cnt"><p class="art_index_h1">Перечень статей:</p><ul class="art_index">')
+                    for name in art_list:
+                        fd.write(f"\n<li><a href='{name}.html'>{name}</a></li>")
+                    fd.write('</ul></div>\n</body></html>')
     except Exception as ex:
         print("[error]: Ошибка получения данных от :", output_name)
         print(ex)
