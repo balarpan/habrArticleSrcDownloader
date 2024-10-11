@@ -114,7 +114,7 @@ class habrArticleSrcDownloader():
             return
 
         url_soup = BeautifulSoup(r.text, 'lxml')
-        comment = self.get_comments(url_soup)
+        comment = self.get_comments(url_soup) if args.comments else None
 
         posts = url_soup.findAll('div', {'class': 'tm-article-body'})
         pictures = url_soup.findAll('img')
@@ -171,7 +171,8 @@ class habrArticleSrcDownloader():
 
         self.save_html(name, text_html)
         self.save_md(name, text_md)
-        self.save_comments(name, str(comment))
+        if args.comments:
+            self.save_comments(name, str(comment))
 
         if not args.quiet:
             print(f"[info]: Статья: {name} сохранена")
@@ -285,8 +286,9 @@ class habrArticleSrcDownloader():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Скрипт для скачивания статей с https://habr.com/")
     parser.add_argument('-q', '--quiet', help="Quiet mode", action='store_true')
+    parser.add_argument('-c', '--comments', help="Создать файл с коментариями к статье", action='store_true')
     parser.add_argument('-l', '--local-pictures',
-                        help="Использовать абсолютный путь к изображениям в сохранённых файлах", action='store_true')
+                        help="Cкачать все картинки локально и использовать абсолютный путь к изображениям", action='store_true')
     parser.add_argument('-i', '--meta-information', help="Добавить мета-информацию о статье в файл", action='store_true')
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -327,7 +329,6 @@ if __name__ == '__main__':
             os.chdir(DIR_SINGLES)
             for ar_id in args.article_id.split(','):
                 habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles)
-            # habrSD.get_article("https://habr.com/ru/post/" + output_name, type_articles)
     except Exception as ex:
         print("[error]: Ошибка получения данных от :", output_name)
         print(ex)
