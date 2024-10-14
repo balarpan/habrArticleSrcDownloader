@@ -162,10 +162,10 @@ class HabrArticleDownloader():
                     self._metadata['author_type'],
                     self._metadata['author']
                     ]) + '/'
-                self.dwnl_div = f"\n<div class='dl-info'><dl>\
+                self.dwnl_div = f"\n<div class='dl-info'><dl>\n\
                 <dt>Url</dt><dd><a href='{url}'>{url}</a></dd>\n\
                 <dt>Автор</dt><dd><a class='author' href='{user_url}'>{self._metadata['author']}</a></dd>\n\
-                <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time><//dd>\n\
+                <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time></dd>\n\
                 </dl></div>\n"
         except:
             print("[error]: Ошибка получения метаданных статьи: ", url)
@@ -327,7 +327,7 @@ class IndexBuilder():
             soup = BeautifulSoup(open(file, encoding="utf8"), 'lxml')
             metadata = [
                 (x, soup.find('meta', {'property': str('hdl_' + x)}))
-                for x in ['author', 'url','post_date','author_country_code','author_type', 'orig_title']]
+                for x in ['author', 'url','post_date','author_country_code','author_type', 'orig_title', 'origin_src_url']]
             metadata = [(x,v.attrs['content']) for x,v in metadata if v]
             metadata = metadata + [('file', file), ('title', soup.find('title').string)]
             metadata = dict(metadata)
@@ -365,9 +365,9 @@ class IndexBuilder():
     def _ul_article(self, fd, articles):
         """Write into file <ul>...</ul> block for provided list of articles"""
         _articles = articles
-        fd.write('\n<ul class="art_index">')
+        fd.write('\n<div class="art_index_ul_cnt"><div class="art_index_ul_before"></div><ul class="art_index">')
         for art in _articles:
-            fd.write(f"\n <li><span><a href='{art['file']}'>")
+            fd.write(f"\n <li><span class='{('art_translation' if 'origin_src_url' in art else '')}'><a href='{art['file']}'>")
             fd.write(html.escape(art['orig_title']) + "</a></span>")
             a = ['&nbsp;<span class="' + x + '">' + html.escape(art[x]) + 
                 '</span>' if x in art else '&nbsp;<span class="missing ' + x + '">&mdash;</span>'
@@ -375,7 +375,7 @@ class IndexBuilder():
             for tg in a:
                 fd.write(tg)
             fd.write('\n </li>')
-        fd.write('\n</ul>\n')
+        fd.write('\n</ul><div class="art_index_ul_after"></div></div>\n')
 
 
 
