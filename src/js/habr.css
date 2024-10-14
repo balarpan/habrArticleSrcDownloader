@@ -33,7 +33,7 @@ ul.art_index {
   box-shadow: 0.25rem 0.25rem 0.75rem rgb(0 0 0 / 0.15);
   padding: 0.4rem;
   margin: 0;
-  border-radius: 0.3rem;
+  border-radius: 5px;
   width: max-content;
 /*
   &:before {
@@ -111,6 +111,9 @@ ul.art_index li .post_date {
 .art_index_cnt ul.author_list > li {
     display:block; margin: 0; padding: 0;
 }
+
+/* эффект загнутого листа у списка авторов */
+/*ul.author_list ul.art_index {position: relative;width: 80%;}*/
 
 .index_spoiler { display:block; }
 .index_spoiler_title {
