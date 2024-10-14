@@ -379,9 +379,11 @@ class IndexBuilder():
             self._ul_article(fd, self._articles)
             fd.write('</div></div>\n')
 
+            # список авторов статей
             authors = natsort.natsorted(set(x['author'] for x in self._articles))
             if len(authors) > 1:
                 fd.write('<p class="art_index_h1">Перечень авторов:</p>')
+                fd.write('<div id="index_author_srch_cnt"></div>\n')
                 fd.write('<ul class="author_list">\n')
                 for a in authors:
                     arts = [x for x in self._articles if x['author'] == a]

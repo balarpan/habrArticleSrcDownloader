@@ -159,6 +159,36 @@ ul.art_index li .post_date {
 .index_spoiler_txt { display:none; box-sizing: border-box; }
 .index_spoiler_open>.index_spoiler_txt { display: block; }
 
+/*index search box */
+.index_srch_cnt input {
+    color: #3f505e;
+    background: #f1f8ff;
+    border-radius: 0.375em 0 0 0.375em;
+    padding: 0.35em 0.45em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-shadow:  3px 3px 5px 0 rgba(255,255,255,.3),
+                -3px -3px 5px 0 rgba(116, 125, 136, .2), 
+                inset -3px -3px 5px 0 rgba(255,255,255,.2),
+                inset 3px 3px 5px 0 rgba(0, 0, 0, .2);
+
+    &::placeholder {
+        color: #6d7f8f;
+      }
+    &:focus {
+        outline: none;
+        color: #3f505e;
+        background-color: #f3f9ff;
+      }
+}
+.index_srch_cnt .search-btn {
+    position:relative; display: inline-block;
+    vertical-align: middle;
+    margin: 0 0 0 0.3rem;
+    align-items: center; justify-content: center;
+}
+
 /* info box with downloaded metadata */
 div.dl-info {
     padding: 1px 15px;
