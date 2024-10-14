@@ -94,18 +94,9 @@ class HabrArticleDownloader():
             fd.write(_HTML_BEGIN_)
             fd.write("<title>" + html.escape(orig_title) + "</title>\n")
             fd.write("</head>\n<body>\n\n")
-            # fd.write("<!DOCTYPE html><html><head>\n<title>" + 
-            #     html.escape(orig_title) + "</title>\n")
-            # fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
-            # fd.write('<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />\n')
-            # fd.write('<meta name=generator content="HabrArticleDownloader" />\n')
             if self._metadata:
                 for k,v in self._metadata.items():
                     fd.write('<meta property="hdl_' + html.escape(k) + '" content="' + html.escape(v) + '" />\n')
-            # fd.write('<link rel="stylesheet" href="js/habr.css">\n')
-            # fd.write('<script src="js/habr.js"></script>\n')
-            # fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
-            # fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
             fd.write(self.dwnl_div + '<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">' + html.escape(orig_title) +'</h1>')
             fd.write(text)
             fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
@@ -204,6 +195,13 @@ class HabrArticleDownloader():
                 self.dwnl_div += "</dl></div>\n"
         except:
             print("[error]: Ошибка получения метаданных статьи: ", url)
+
+        #заменим абсолютные ссылки на разделы в тексте (#) на относительные
+        a_re = re.compile(r'/(#[^/]+)$')
+        for post in posts:
+            for a in post.findAll('a', href=a_re):
+                link = a.get('href')
+                a['href'] = a['href'].replace( link, re.search(a_re, link).group(1))
 
         for post in posts:
             if args.local_pictures:
@@ -374,11 +372,6 @@ class IndexBuilder():
             self._articles.append(metadata)
         with open("index.html", "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
-            # fd.write('<!DOCTYPE html>\n<html><head>\n')
-            # fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
-            # fd.write('<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">\n')
-            # fd.write('<link rel="stylesheet" href="js/habr.css">\n')
-            # fd.write('<script src="js/habr.js"></script>\n</head><body>\n\n')
             fd.write('</head><body>\n\n')
             fd.write('<div class="art_index_cnt"><p class="art_index_h1">Перечень статей:</p>\n')
 

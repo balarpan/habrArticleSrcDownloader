@@ -53,9 +53,10 @@ ul.art_index {
     background: rgba(255, 0, 0, 0.2);
     margin-left: 41px;
     z-index: 2;
-  }
+  } */
+  &:after { margin:0; }
 
-*/}
+}
 /*
 ul.art_index:hover li {
   opacity: 0.65;
