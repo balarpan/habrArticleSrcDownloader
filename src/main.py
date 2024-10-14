@@ -26,6 +26,18 @@ DIR_PICTURE = 'picture'
 DIR_VIDEO = 'video'
 DIR_SINGLES = 'singles'
 HABR_TITLE = "https://habr.com"
+_HTML_BEGIN_ = """<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
+<meta name=generator content="HabrArticleDownloader" />
+<link rel="stylesheet" href="js/habr.css">
+<script src="js/habr.js"></script>
+<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">
+<script src="js/highlightjs/highlight.min.js"></script>
+"""
 
 
 def callback(el):
@@ -79,18 +91,21 @@ class HabrArticleDownloader():
     def save_html(self, name: str, text: str):
         orig_title = self._metadata['orig_title']
         with open(name + ".html", "w", encoding="UTF-8") as fd:
-            fd.write("<!DOCTYPE html><html><head>\n<title>" + 
-                html.escape(orig_title) + "</title>\n")
-            fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
-            fd.write('<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />\n')
-            fd.write('<meta name=generator content="HabrArticleDownloader" />\n')
+            fd.write(_HTML_BEGIN_)
+            fd.write("<title>" + html.escape(orig_title) + "</title>\n")
+            fd.write("</head>\n<body>\n\n")
+            # fd.write("<!DOCTYPE html><html><head>\n<title>" + 
+            #     html.escape(orig_title) + "</title>\n")
+            # fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
+            # fd.write('<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />\n')
+            # fd.write('<meta name=generator content="HabrArticleDownloader" />\n')
             if self._metadata:
                 for k,v in self._metadata.items():
                     fd.write('<meta property="hdl_' + html.escape(k) + '" content="' + html.escape(v) + '" />\n')
-            fd.write('<link rel="stylesheet" href="js/habr.css">\n')
-            fd.write('<script src="js/habr.js"></script>\n')
-            fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
-            fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
+            # fd.write('<link rel="stylesheet" href="js/habr.css">\n')
+            # fd.write('<script src="js/habr.js"></script>\n')
+            # fd.write('<link rel="stylesheet" href="js/highlightjs/stackoverflow-light.min.css">\n')
+            # fd.write('<script src="js/highlightjs/highlight.min.js"></script>\n</head>\n<body>\n\n')
             fd.write(self.dwnl_div + '<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">' + html.escape(orig_title) +'</h1>')
             fd.write(text)
             fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
@@ -114,7 +129,6 @@ class HabrArticleDownloader():
                 return
 
             url_soup = BeautifulSoup(r.text, 'lxml')
-
             return markdownify.markdownify(str(url_soup), heading_style="ATX", code_language_callback=callback)
 
     def get_article(self, url, name=None) -> str:
@@ -127,8 +141,8 @@ class HabrArticleDownloader():
             return
 
         url_soup = BeautifulSoup(r.text, 'lxml')
-        comment = self.get_comments(url_soup) if args.comments else None
 
+        comment = self.get_comments(url_soup) if args.comments else None
         posts = url_soup.findAll('div', {'class': 'tm-article-body'})
         pictures = url_soup.findAll('img')
         video = url_soup.findAll('div', {'class': 'tm-iframe_temp'})
@@ -142,31 +156,52 @@ class HabrArticleDownloader():
 
         try:
             article_createtime = url_soup.find('span',
-                                               {'class': 'tm-article-datetime-published'}).find('time').get('title') or ''
+                                               {'class': 'tm-article-datetime-published'}).find('time').get('title')
             # article_createtime = article_createtime.replace(",", "", 1)
             article_createtime = article_createtime[:10]
-            article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/') or []
+            article_author = url_soup.find('a', {'class': 'tm-user-info__username'}).get('href').split('/')
             self._metadata = {
                 'url': url,
                 'author': article_author[len(article_author) - 2],
                 'author_type': article_author[len(article_author) - 3],
                 'author_country_code': article_author[len(article_author) - 4],
-                'post_date': article_createtime,
-                'orig_title': url_soup.find('h1', 'tm-title tm-title_h1').string or name,
-                'origin_src_url': url_soup.find('a', 'tm-article-presenter__origin-link').get('href') if url_soup.find('a', 'tm-article-presenter__origin-link') else None
+                'post_date': article_createtime
                 }
-            self._metadata = {k: v for k, v in self._metadata.items() if v is not None}
+            meta_cmd = [
+            ("orig_title","url_soup.find('h1', 'tm-title tm-title_h1').string"),
+            ("origin_src_url","url_soup.find('a', 'tm-article-presenter__origin-link').get('href')"),
+            ("company_name","url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').string"),
+            ("company_profile_url","url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').get('href')"),
+            ("company_site","url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').text"),
+            ("company_site_url","url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').get('href')"),
+            ("company_location","url_soup.find('dt', 'tm-description-list__title', string='Местоположение').find_next_siblings('dd').string")]
+            for meta in meta_cmd:
+                try:
+                   self._metadata[meta[0]] = eval(meta[1])
+                except Exception as ex:
+                    pass
+
+            if 'orig_title' not in self._metadata:
+                self._metadata['orig_title'] = name
+            if 'company_name' in self._metadata:
+                self._metadata['is_company_blog'] = '1'
+            # self._metadata = {k: v for k, v in self._metadata.items() if v is not None}
+
             if not args.no_meta_information:
-                user_url = 'https://habr.com/' + '/'.join([
+                user_url = HABR_TITLE + '/' + '/'.join([
                     self._metadata['author_country_code'],
                     self._metadata['author_type'],
                     self._metadata['author']
                     ]) + '/'
                 self.dwnl_div = f"\n<div class='dl-info'><dl>\n\
                 <dt>Url</dt><dd><a href='{url}'>{url}</a></dd>\n\
-                <dt>Автор</dt><dd><a class='author' href='{user_url}'>{self._metadata['author']}</a></dd>\n\
-                <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time></dd>\n\
-                </dl></div>\n"
+                <dt>Автор</dt><dd><a class='author' href='{user_url}'>{html.escape(self._metadata['author'])}</a></dd>\n\
+                <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time></dd>"
+                if 'company_profile_url' in self._metadata and 'company_name' in self._metadata:
+                    self.dwnl_div += f'<dt>Компания</dt><dd><a class="company_name" href="{self._metadata["company_profile_url"]}">' + html.escape(self._metadata['company_name']) + '</a></dd>\n'
+                elif 'company_name' in self._metadata:
+                    self.dwnl_div += '<dt>Компания</dt><dd><span class="company_name">' + html.escape(self._metadata['company_name']) + '</span></dd>\n'
+                self.dwnl_div += "</dl></div>\n"
         except:
             print("[error]: Ошибка получения метаданных статьи: ", url)
 
@@ -327,7 +362,8 @@ class IndexBuilder():
             soup = BeautifulSoup(open(file, encoding="utf8"), 'lxml')
             metadata = [
                 (x, soup.find('meta', {'property': str('hdl_' + x)}))
-                for x in ['author', 'url','post_date','author_country_code','author_type', 'orig_title', 'origin_src_url']]
+                for x in ['author', 'url','post_date','author_country_code','author_type', 'orig_title', 'origin_src_url',
+                    'company_name','company_profile_url', 'company_site', 'company_site_url', 'is_company_blog']]
             metadata = [(x,v.attrs['content']) for x,v in metadata if v]
             metadata = metadata + [('file', file), ('title', soup.find('title').string)]
             metadata = dict(metadata)
@@ -337,11 +373,13 @@ class IndexBuilder():
                 metadata['author'] = 'неизв.'
             self._articles.append(metadata)
         with open("index.html", "w", encoding="UTF-8") as fd:
-            fd.write('<!DOCTYPE html>\n<html><head>\n')
-            fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
-            fd.write('<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">\n')
-            fd.write('<link rel="stylesheet" href="js/habr.css">\n')
-            fd.write('<script src="js/habr.js"></script>\n</head><body>\n\n')
+            fd.write(_HTML_BEGIN_)
+            # fd.write('<!DOCTYPE html>\n<html><head>\n')
+            # fd.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">')
+            # fd.write('<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">\n')
+            # fd.write('<link rel="stylesheet" href="js/habr.css">\n')
+            # fd.write('<script src="js/habr.js"></script>\n</head><body>\n\n')
+            fd.write('</head><body>\n\n')
             fd.write('<div class="art_index_cnt"><p class="art_index_h1">Перечень статей:</p>\n')
 
             fd.write('<div class="index_spoiler index_spoiler_open" role="button" tabindex="0"><span class="index_spoiler_title">По алфавиту:</span>\n<div class="index_spoiler_txt">\n')
@@ -355,12 +393,14 @@ class IndexBuilder():
                 for a in authors:
                     arts = [x for x in self._articles if x['author'] == a]
                     fd.write('<li><div class="index_spoiler" role="button" tabindex="0">\
-                        <span class="index_spoiler_title"><span class="author">' + html.escape(a) + '</span></span><div class="index_spoiler_txt">')
+                        <span class="index_spoiler_title"><span class="author">' + html.escape(a) + '</span>' +
+                        ('&nbsp;<span class="company_name">' + html.escape(arts[0]['company_name']) + '</span>' if 'company_name' in arts[0] else '')+
+                        '</span><div class="index_spoiler_txt">')
                     self._ul_article(fd, arts)
                     fd.write('</div></div></li>\n')
                 fd.write('</ul>\n')
 
-            fd.write('</div>\n<div class="art_index_end"></div></body></html>')
+            fd.write('</div>\n<div class="art_index_end"></div>\n</body></html>')
 
     def _ul_article(self, fd, articles):
         """Write into file <ul>...</ul> block for provided list of articles"""

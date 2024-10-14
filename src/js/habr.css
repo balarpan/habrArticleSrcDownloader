@@ -24,7 +24,16 @@ body {
     margin: 15px 0 0.9rem 69px;
 }
 .art_index_ul_cnt {position: relative;}
-.art_index_ul_before{}
+.art_index_ul_before{
+    border-right: 2px solid rgba(255, 0, 0, 0.2);
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 3.4rem;;
+}
 ul.art_index {
   list-style-position: inside;
   font-family: "Open Sans", sans-serif;
@@ -55,7 +64,7 @@ ul.art_index:hover li {
 ul.art_index li {
     list-style-type: none;
     line-height: 1.9rem;
-    padding: 0 0 0 58px;
+    padding: 0 0 0 3.5rem;
     border-bottom: 1px solid lightblue;
     transition: 0.4s;
     display: flex;
@@ -96,6 +105,7 @@ ul.art_index a {
         background-repeat: no-repeat;
     }
 }
+.company_name { color: #5b25f0; }
 
 ul.art_index li .post_date {
     width: max-content; min-width: 4.5rem;
@@ -113,7 +123,8 @@ ul.art_index li .post_date {
 }
 
 /* эффект загнутого листа у списка авторов */
-/*ul.author_list ul.art_index {position: relative;width: 80%;}*/
+/* ul.author_list ul.art_index {position: relative;transform: rotate(1deg);} */
+
 
 .index_spoiler { display:block; }
 .index_spoiler_title {
