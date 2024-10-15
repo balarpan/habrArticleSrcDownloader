@@ -20,6 +20,8 @@ import warnings
 from bs4 import XMLParsedAsHTMLWarning
 warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 
+import concurrent.futures
+
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
 DIR_PICTURE = 'picture'
@@ -46,6 +48,21 @@ def callback(el):
         return soup.find('code')['class'][0]
     except:
         return None
+
+def imgDownload(url: str, file: str, chdir: str = None):
+    """Download single image. file - filename. chdir (optional) - directory for saving file."""
+    try:
+        img_data = requests.get(url).content
+        if chdir:
+            filename = os.path.join(chdir,file)
+        else:
+            filename = file
+
+        with open(filename, 'wb') as handler:
+            handler.write(img_data)
+    except requests.exceptions.RequestException:
+        print("[error]: Ошибка получения картинки: ", url)
+
 
 class HabrArticleDownloader():
 
@@ -244,20 +261,19 @@ class HabrArticleDownloader():
         return name
 
     def save_pictures(self, pictures):
-        for link in pictures:
-            # для svg (формулы LaTeX) и др. data-src не проставлен
-            link_url = link.get('data-src') or link.get('src')
-            if link_url:
-                link_dst = os.path.basename(urlparse(link_url).path)
-                # если картинка уже создана, то второй раз не скачиваем
-                if os.path.exists(link_dst):
-                    continue
-                try:
-                    img_data = requests.get(link_url).content
-                    with open(link_dst, 'wb') as handler:
-                        handler.write(img_data)
-                except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения картинки: ", link_url)
+        mp_tasks = dict()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=None) as executor:
+            for link in pictures:
+                # для svg (формулы LaTeX) и др. data-src не проставлен
+                link_url = link.get('data-src') or link.get('src')
+                if link_url:
+                    link_dst = os.path.basename(urlparse(link_url).path)
+                    # если картинка уже создана, то второй раз не скачиваем
+                    if os.path.exists(link_dst):
+                        continue
+
+                    dict.update( {executor.submit(imgDownload, link_url, link_dst): link_dst} )
+            concurrent.futures.wait(mp_tasks)
 
     def save_video(self, video, article_name):
         with open('video.txt', 'w+', encoding='UTF-8') as f:
