@@ -262,7 +262,7 @@ class HabrArticleDownloader():
 
     def save_pictures(self, pictures):
         mp_tasks = dict()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=None) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=None) as executor:
             for link in pictures:
                 # для svg (формулы LaTeX) и др. data-src не проставлен
                 link_url = link.get('data-src') or link.get('src')
@@ -327,26 +327,24 @@ class HabrArticleDownloader():
     def parse_articles(self, type_articles):
         print(f"[info]: Будет загружено: {len(self.posts)} статей.")
 
-        with pymp.Parallel(multiprocessing.cpu_count()) as pmp:
-            #for p in self.posts :
-            for i in pmp.range(0, len(self.posts)):
-                p = self.posts[i]
-                if not args.quiet:
-                    print("[info]: Скачивается:", p.text)
+        for i in range(0, len(self.posts)):
+            p = self.posts[i]
+            if not args.quiet:
+                print("[info]: Скачивается:", p.text)
 
-                name = self.dir_cor_name(p.text)
+            name = self.dir_cor_name(p.text)
 
-                dir_path = '{:03}'.format(len(self.posts) - i) + " " + name
+            dir_path = '{:03}'.format(len(self.posts) - i) + " " + name
 
-                # создаем директории с названиями статей
-                self.create_dir(dir_path)
-                # заходим в директорию статьи
-                os.chdir(dir_path)
+            # создаем директории с названиями статей
+            # self.create_dir(dir_path)
+            # заходим в директорию статьи
+            # os.chdir(dir_path)
 
-                self.get_article(HABR_TITLE + p.get('href'), name)
+            self.get_article(HABR_TITLE + p.get('href'), name)
 
-                # выходим из директории статьи
-                os.chdir('../')
+            # выходим из директории статьи
+            # os.chdir('../')
 
     def main(self, url, dir, type_articles):
         # создаем папку для статей
@@ -476,9 +474,8 @@ if __name__ == '__main__':
                     print("[error]: Ошибка создания директории: {}".format(DIR_SINGLES))
                     raise SystemExit
             os.chdir(DIR_SINGLES)
-            art_list = []
             for ar_id in args.article_id.split(','):
-                art_list.append(habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles))
+                habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles)
     except Exception as ex:
         print("[error]: Ошибка получения данных от :", output_name)
         print(ex)

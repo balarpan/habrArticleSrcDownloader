@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 RUN apt-get update && \
-    apt-get -y install python3-pip python3-lxml libomp-dev && \
+    apt-get -y install python3-pip python3-lxml && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY requirements.txt requirements.txt

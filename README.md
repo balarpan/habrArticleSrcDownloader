@@ -29,7 +29,7 @@
   - в каталоге одиночных статей создаётся файл index.html со сслыками на все найденные в папке HTML-файлы с указанием автора и даты публикации;
   - в index.html включены все файлы в папке, в том числе не скачанные этим скриптом (автор будет указан как "неизв.").
 
-Тестирование проводилось только на скачивании одиночных статей.
+Внимание: Полное тестирование проводилось только на скачивании одиночных статей.
 
 
 ## Как использовать:
@@ -38,13 +38,13 @@
 
 #### Linux
 ```bash
-apt-get install python3-lxml libomp-dev
+apt-get install python3-lxml
 pip3 install -r requirements.txt
 ```
 
 #### macOS
 ```bash
-brew install python-lxml libomp
+brew install python-lxml
 pip3 install -r requirements.txt
 ```
 
@@ -98,27 +98,25 @@ options:
 Если все было сделано успешно, то Вы увидите примерно следующее:
 ```bash
 ./src/main.py -u jessy_james
-[info]: Скачивается: C/C++ из Python (ctypes) на Android
-[info]: Директория: 16 C C++ из Python (ctypes) на Android создана
-[info]: Директория: picture создана
-[info]: Статья: C C++ из Python (ctypes) на Android сохранена
-[info]: Скачивается: Своя docking station для ноутбука
-[info]: Директория: 15 Своя docking station для ноутбука создана
-[info]: Директория: picture создана
-[info]: Статья: Своя docking station для ноутбука сохранена
-[info]: Скачивается: Tango Controls hdbpp-docker
-[info]: Директория: 14 Tango Controls hdbpp-docker создана
-[info]: Директория: picture создана
+[info]: Будет загружено: 22 статей.
+[info]: Скачивается: Шахматы. От начала до читов
+[info]: Статья: Шахматы. От начала до читов сохранена
+[info]: Скачивается: C/C++ из Python (Kivy, ctypes) на iOS
+[info]: Статья: C C++ из Python (Kivy, ctypes) на iOS сохранена
+[info]: Скачивается: Резервное копирование репозиториев с github, gitlab
+[info]: Статья: Резервное копирование репозиториев с github, gitlab сохранена
+[info]: Скачивается: Android. Starting Kivy App and Service on bootup
+[info]: Статья: Android. Starting Kivy App and Service on bootup сохранена
 
 ...
 
+[info]: Скачивается: Python из C (C API)
+[info]: Статья: Python из C (C API) сохранена
+[info]: Скачивается: Игрушка ГАЗ-66 на пульте управления. Часть 3
+[info]: Статья: Игрушка ГАЗ-66 на пульте управления. Часть 3 сохранена
 [info]: Скачивается: Игрушка ГАЗ-66 на пульте управления. Часть 2
-[info]: Директория: 2 Игрушка ГАЗ-66 на пульте управления. Часть 2 создана
-[info]: Директория: picture создана
 [info]: Статья: Игрушка ГАЗ-66 на пульте управления. Часть 2 сохранена
 [info]: Скачивается: Игрушка ГАЗ-66 на пульте управления. Часть 1
-[info]: Директория: 1 Игрушка ГАЗ-66 на пульте управления. Часть 1 создана
-[info]: Директория: picture создана
 [info]: Статья: Игрушка ГАЗ-66 на пульте управления. Часть 1 сохранена
 
 ```
