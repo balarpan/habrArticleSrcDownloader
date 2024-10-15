@@ -5,7 +5,6 @@ import os
 import shutil
 import argparse
 import re
-import pymp
 import requests
 import markdownify
 import multiprocessing
@@ -140,7 +139,7 @@ class HabrArticleDownloader():
             return markdownify.markdownify(str(url_soup), heading_style="ATX", code_language_callback=callback)
 
     def get_article(self, url, name=None) -> str:
-        if not args.quiet:
+        if not args.quiet and name in (None,'s'):
             print(f"[info]: Скачиваем {url}")
         try:
             r = requests.get(url)
@@ -261,8 +260,8 @@ class HabrArticleDownloader():
         return name
 
     def save_pictures(self, pictures):
-        mp_tasks = dict()
         with concurrent.futures.ProcessPoolExecutor(max_workers=None) as executor:
+            mp_tasks = dict()
             for link in pictures:
                 # для svg (формулы LaTeX) и др. data-src не проставлен
                 link_url = link.get('data-src') or link.get('src')
@@ -272,8 +271,12 @@ class HabrArticleDownloader():
                     if os.path.exists(link_dst):
                         continue
 
-                    dict.update( {executor.submit(imgDownload, link_url, link_dst): link_dst} )
-            concurrent.futures.wait(mp_tasks)
+                    mp_tasks.update( {link_dst: executor.submit(imgDownload, link_url, link_dst)} )
+            while True:
+                tsk_status = concurrent.futures.wait(mp_tasks.values(), timeout=5)
+                if 0 == len(tsk_status.not_done):
+                    break;
+                print("[info]: Ожидание окончания загрузки %i изображений" % len(tsk_status.not_done))
 
     def save_video(self, video, article_name):
         with open('video.txt', 'w+', encoding='UTF-8') as f:
@@ -477,8 +480,9 @@ if __name__ == '__main__':
             for ar_id in args.article_id.split(','):
                 habrSD.get_article("https://habr.com/ru/post/" + ar_id, type_articles)
     except Exception as ex:
+        import traceback
         print("[error]: Ошибка получения данных от :", output_name)
-        print(ex)
+        print(traceback.format_exc())
     try:
         if not args.no_index:
             index = IndexBuilder()
@@ -486,5 +490,3 @@ if __name__ == '__main__':
     except Exception as ex:
         print("[error]: Ошибка создания файла index.html")
         print(ex)
-
-# apt install libomp-dev
