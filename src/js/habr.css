@@ -119,6 +119,7 @@ ul.art_index li .post_date {
 .art_index_cnt ul.author_list {
     list-style-type: none; margin: 0; padding: 0;
 }
+.art_index_cnt ul.author_list.authorsCatalogue { columns: 3; }
 .art_index_cnt ul.author_list > li {
     display:block; margin: 0; padding: 0;
 }
@@ -160,6 +161,7 @@ ul.art_index li .post_date {
 .index_spoiler_open>.index_spoiler_txt { display: block; }
 
 /*index search box */
+.index_srch_cnt {margin: 0 0 0.7rem 3em;}
 .index_srch_cnt input {
     color: #3f505e;
     background: #f1f8ff;
@@ -167,6 +169,7 @@ ul.art_index li .post_date {
     padding: 0.35em 0.45em;
     -webkit-appearance: none;
     -moz-appearance: none;
+    outline: none !important;
     appearance: none;
     box-shadow:  3px 3px 5px 0 rgba(255,255,255,.3),
                 -3px -3px 5px 0 rgba(116, 125, 136, .2), 
@@ -176,8 +179,9 @@ ul.art_index li .post_date {
     &::placeholder {
         color: #6d7f8f;
       }
-    &:focus {
-        outline: none;
+    &:focus, {
+        outline: none !important;
+        -webkit-appearance:none;
         color: #3f505e;
         background-color: #f3f9ff;
       }
@@ -221,9 +225,10 @@ div.dl-info time {
 
 /* index.html footer */
 .art_index_end {
-    width:96px; height:96px; padding:0; border:none; margin:auto;
-    content:url('img/habr_logo_96x96.png');
+    width:96px; height:96px; padding:0; border:none; margin: 1.3rem auto;
+    content:url('img/my_logo_192x192.png');
 }
+
 
 /* habr article */
 .tm-page-width {
@@ -577,6 +582,9 @@ div.dl-info time {
 .article-formatted-body a {
   color: #548EAA;
   text-decoration: none;
+}
+.article-formatted-body_version-2 h2 {
+  margin-top: 56px;
 }
 .tm-article-presenter__origin {
   -moz-osx-font-smoothing: grayscale;
