@@ -401,7 +401,7 @@ class IndexBuilder():
         return [os.path.basename(p) for p in a_list]
 
     def articlesInDir(self, dirpath='.'):
-        """List of article files in dirpath. Return's array of 'dirpath/file.html'"""
+        """List of article HTML-files in dirpath. Return's array of 'dirpath/file.html'"""
         return [
             os.path.join(dirpath,f) for f in natsort.os_sorted(os.listdir(dirpath))
                 if os.path.isfile(os.path.join(dirpath,f)) and f.endswith('.html') and f.lower() != 'index.html'
@@ -481,19 +481,31 @@ class IndexBuilder():
         self.make_index(dirpath=dirpath, with_authors_list=True)
 
     def indexCatalogue(self, dirpath='.'):
+        """Top-level index.html for -u and -f run args"""
         a_list = natsort.natsorted( self.authorsInDir(dirpath) )
         print("[info]: Построение индексов для %i каталогов авторов" % len(a_list))
+        a_meta = {}
         for author in a_list:
+            a_file = self.articlesInDir(dirpath=os.path.join(dirpath,author))
+            if a_file and len(a_file):
+                a_meta.update({author: self.fileMetadata(a_file[0])})
+                a_meta[author]['article_count'] = len(a_file)
             self.make_index(dirpath=author, with_authors_list=False)
         with open(os.path.join(dirpath,"index.html"), "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write('</head><body>\n\n')
-            fd.write('<div class="art_index_cnt authorsCatalogue"><p class="art_index_h1">Перечень авторов:</p>\n')
+            fd.write('<div class="art_index_cnt authorsCatalogue"><p class="art_index_h1">Перечень авторов и количества статей:</p>\n')
 
             fd.write('<div class="index_author_srch_cnt"></div>\n')
             fd.write('<ul class="author_list authorsCatalogue">\n')
             for a in a_list:
-                fd.write(f'  <li><a class="author" href="{a}/index.html">' + html.escape(a) + '</a></li>\n')
+                if a in a_meta and 'company_name' in a_meta[a]:
+                    company_name = '<span class="company_name">' + html.escape(a_meta[a]['company_name']) + '</span>'
+                    art_count = "(" + str(a_meta[a]['article_count']) + ")" 
+                else:
+                    company_name = ''
+                    art_count = "(" + str(a_meta[a]['article_count']) + ")" 
+                fd.write(f'  <li><a class="author" href="{a}/index.html">{html.escape(a)}</a>{art_count}&nbsp;{company_name}</li>\n')
             fd.write('</ul>\n')
 
             fd.write('</div>\n<div class="art_index_end"></div>\n</body></html>')
@@ -536,9 +548,10 @@ if __name__ == '__main__':
     try:
         if not args.article_id:
             habrSD.main("https://habr.com/ru/users/" + output_name, output, type_articles)
-            index = IndexBuilder()
-            # index.indexAuthor(args.user_name_for_articles)
-            index.indexCatalogue()
+            if not args.no_index:
+                index = IndexBuilder()
+                # index.indexAuthor(args.user_name_for_articles)
+                index.indexCatalogue()
         else:
             if not os.path.exists(DIR_SINGLES):
                 try:
