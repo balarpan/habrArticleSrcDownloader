@@ -177,7 +177,8 @@ class HabrArticleDownloader():
                 'author': article_author[len(article_author) - 2],
                 'author_type': article_author[len(article_author) - 3],
                 'author_country_code': article_author[len(article_author) - 4],
-                'post_date': article_createtime
+                'post_date': article_createtime,
+                'article_id': url.split('/')[-1]
                 }
             meta_cmd = [
             ("orig_title","url_soup.find('h1', 'tm-title tm-title_h1').string"),
@@ -400,18 +401,22 @@ class IndexBuilder():
         return [os.path.basename(p) for p in a_list]
 
     def articlesInDir(self, dirpath='.'):
-        """Scan folder and return array of dictionary of metadata for each HTML file"""
-        src_articles = [
+        """List of article files in dirpath. Return's array of 'dirpath/file.html'"""
+        return [
             os.path.join(dirpath,f) for f in natsort.os_sorted(os.listdir(dirpath))
                 if os.path.isfile(os.path.join(dirpath,f)) and f.endswith('.html') and f.lower() != 'index.html'
-            ]
+        ]
+
+    def articlesMetaInDir(self, dirpath='.'):
+        """Scan folder and return array of dictionary of metadata for each HTML file"""
+        src_articles = self.articlesInDir(dirpath)
         _articles = []
         for file in src_articles:
             _articles.append( self.fileMetadata(file) )
         return _articles
 
     def make_index(self, dirpath='.', with_authors_list=True):
-        self._articles = self.articlesInDir(dirpath)
+        self._articles = self.articlesMetaInDir(dirpath)
         with open(os.path.join(dirpath,"index.html"), "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write('</head><body>\n\n')
