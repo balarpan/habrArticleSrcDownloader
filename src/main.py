@@ -114,10 +114,10 @@ class HabrArticleDownloader():
         with open(name + ".html", "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write("<title>" + html.escape(orig_title) + "</title>\n")
-            fd.write("</head>\n<body>\n\n")
             if self._metadata:
                 for k,v in self._metadata.items():
                     fd.write('<meta property="hdl_' + html.escape(k) + '" content="' + html.escape(v) + '" />\n')
+            fd.write("</head>\n<body>\n\n")
             fd.write(self.dwnl_div + '<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">' + html.escape(orig_title) +'</h1>')
             fd.write(text)
             fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
