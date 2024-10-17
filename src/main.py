@@ -206,7 +206,7 @@ class HabrArticleDownloader():
                     self._metadata['author_type'],
                     self._metadata['author']
                     ]) + '/'
-                self.dwnl_div = f"\n<div class='dl-info'><dl>\n\
+                self.dwnl_div = f"\n<div class='dl-info-cnt'><div class='dl-info' data-article-id='{self._metadata['article_id']}'><dl>\n\
                 <dt>Url</dt><dd><a href='{url}'>{url}</a></dd>\n\
                 <dt>Автор</dt><dd><a class='author' href='{user_url}'>{html.escape(self._metadata['author'])}</a></dd>\n\
                 <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time></dd>"
@@ -214,7 +214,7 @@ class HabrArticleDownloader():
                     self.dwnl_div += f'<dt>Компания</dt><dd><a class="company_name" href="{self._metadata["company_profile_url"]}">' + html.escape(self._metadata['company_name']) + '</a></dd>\n'
                 elif 'company_name' in self._metadata:
                     self.dwnl_div += '<dt>Компания</dt><dd><span class="company_name">' + html.escape(self._metadata['company_name']) + '</span></dd>\n'
-                self.dwnl_div += "</dl></div>\n"
+                self.dwnl_div += "</dl></div></div>\n"
         except:
             print("[error]: Ошибка получения метаданных статьи: ", url)
 

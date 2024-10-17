@@ -179,9 +179,9 @@ ul.art_index li .post_date {
     &::placeholder {
         color: #6d7f8f;
       }
-    &:focus, {
-        outline: none !important;
-        -webkit-appearance:none;
+    &:focus, &:hover, &:active:focus,{
+        outline: 0 none !important;
+        -webkit-appearance: none;
         color: #3f505e;
         background-color: #f3f9ff;
       }
@@ -191,27 +191,48 @@ ul.art_index li .post_date {
     vertical-align: middle;
     margin: 0 0 0 0.3rem;
     align-items: center; justify-content: center;
+    transition: all .3s ease;
+    &:hover { transform: scale(1.125); }
 }
 
 /* info box with downloaded metadata */
-div.dl-info {
-    padding: 1px 15px;
-    border-left: 3px solid #a8a8a8; border-image: linear-gradient(to top, #a8a8a8, rgba(0, 0, 0, 0)) 1 80%;
-    background-color: #F7F9F9;
-    margin: 0;
-    overflow: auto;
+div.dl-info-cnt {
+    margin:0; padding:0;border:0;
     float: right;
+    filter: drop-shadow(1px 4px 7px rgba(50, 50, 0, 0.3));
+}
+div.dl-info {
+    padding: 1.45rem 0.8rem 0.8rem 0.8rem;
+    background-color: #F5F2DF;
+    margin: 0;
+    overflow: visible;
     line-height: 0.4rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-/*    border: 1px solid #d6d6d6;*/
+    border-radius: 4px;
+    min-width: 12rem;
+/*    clip-path: polygon(0% 0%, 5.2rem 0%, 5.2rem 1.2rem, 100% 1.2rem, 100% 100%, 0% 100%);*/
+    clip-path: polygon(0% 1.2rem, 0.4rem 0%, 8.8rem 0%, 9.2rem 1.2rem, 100% 1.2rem, 100% 100%, 0% 100%);
+    position: relative;
+    &:after {
+        position:absolute;
+        left: 0.9rem; top: 0.2rem;
+        width: 7rem; height: 0.8rem; line-height: 0.8rem;
+        font-size: 0.7rem; color: #344dac;
+        content: attr(data-article-id); overflow: hidden; white-space:nowrap; text-align: center;
+        background: #f8f8f8;
+    }
 }
-div.dl-info dl {line-height: 1.4rem; display: grid; grid-template-columns: max-content auto;}
+div.dl-info dl {
+    margin: 0;
+    line-height: 1.4rem;
+    display: grid; grid-template-columns: max-content auto;
+}
 div.dl-info dt {grid-column-start: 1; font-style: italic; color:#333; text-align: right; margin-right: 0.4rem;
     &:after {content: ": ";}
 }
 div.dl-info dd {grid-column-start: 2; min-width: 50%; margin:0;}
-div.dl-info a { font-size: 0.9rem; text-decoration: none;}
-div.dl-info a:hover {text-decoration: underline;}
+div.dl-info a { font-size: 0.9rem; text-decoration: none; transition: all 1.5s ease;}
+div.dl-info a:hover {text-decoration: underline; }
 div.dl-info time {
     border: 1px solid #fff8dc;
     background-color: #fff;
