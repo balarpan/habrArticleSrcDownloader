@@ -178,16 +178,16 @@ class HabrArticleDownloader():
                 'author_type': article_author[len(article_author) - 3],
                 'author_country_code': article_author[len(article_author) - 4],
                 'post_date': article_createtime,
-                'article_id': url.split('/')[-1]
+                'article_id': re.search(r'(?:/)(\d+)(?:/?)$', url).group(1)
                 }
             meta_cmd = [
-            ("orig_title","url_soup.find('h1', 'tm-title tm-title_h1').string"),
-            ("origin_src_url","url_soup.find('a', 'tm-article-presenter__origin-link').get('href')"),
-            ("company_name","url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').string"),
-            ("company_profile_url","url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').get('href')"),
-            ("company_site","url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').text"),
-            ("company_site_url","url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').get('href')"),
-            ("company_location","url_soup.find('dt', 'tm-description-list__title', string='Местоположение').find_next_siblings('dd').string")]
+            ("orig_title", "url_soup.find('h1', 'tm-title tm-title_h1').string"),
+            ("origin_src_url", "url_soup.find('a', 'tm-article-presenter__origin-link').get('href')"),
+            ("company_name", "url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').string"),
+            ("company_profile_url", "url_soup.find('div', 'tm-company-snippet').find('a', 'tm-company-snippet__title').get('href')"),
+            ("company_site", "url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').text"),
+            ("company_site_url", "url_soup.find('dd', 'tm-description-list__body').find('a', 'tm-company-basic-info__link').get('href')"),
+            ("company_location", "url_soup.find('dt', 'tm-description-list__title', string='Местоположение').find_next_siblings('dd').string")]
             for meta in meta_cmd:
                 try:
                    self._metadata[meta[0]] = eval(meta[1])
@@ -206,7 +206,8 @@ class HabrArticleDownloader():
                     self._metadata['author_type'],
                     self._metadata['author']
                     ]) + '/'
-                self.dwnl_div = f"\n<div class='dl-info-cnt'><div class='dl-info' data-article-id='{self._metadata['article_id']}'><dl>\n\
+                self.dwnl_div = f"\n<div class='dl-info-cnt'>\
+                <div class='dl-info' data-article-id='{self._metadata['article_id']}' data-title-first-c='{name[0]}'><dl>\n\
                 <dt>Url</dt><dd><a href='{url}'>{url}</a></dd>\n\
                 <dt>Автор</dt><dd><a class='author' href='{user_url}'>{html.escape(self._metadata['author'])}</a></dd>\n\
                 <dt>Дата</dt><dd><time datetime='{article_createtime}'>{article_createtime}</time></dd>"

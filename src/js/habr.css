@@ -197,7 +197,7 @@ ul.art_index li .post_date {
 
 /* info box with downloaded metadata */
 div.dl-info-cnt {
-    margin:0; padding:0;border:0;
+    margin:0 0 0 2px; padding:0;border:0;
     float: right;
     filter: drop-shadow(1px 4px 7px rgba(50, 50, 0, 0.3));
 }
@@ -216,9 +216,9 @@ div.dl-info {
     &:after {
         position:absolute;
         left: 0.9rem; top: 0.2rem;
-        width: 7rem; height: 0.8rem; line-height: 0.8rem;
-        font-size: 0.7rem; color: #344dac;
-        content: attr(data-article-id); overflow: hidden; white-space:nowrap; text-align: center;
+        width: 4rem; height: 0.8rem; line-height: 0.8rem;
+        font-size: 0.7rem; color: #585858; padding: 0 0 0 0.9rem;
+        content: attr(data-title-first-c); overflow: hidden; white-space:nowrap; text-align: left;
         background: #f8f8f8;
     }
 }
