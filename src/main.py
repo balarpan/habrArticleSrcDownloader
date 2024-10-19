@@ -110,7 +110,7 @@ class HabrArticleDownloader():
             fd.write(text)
 
     def save_html(self, name: str, text: str):
-        orig_title = self._metadata['orig_title']
+        orig_title = self._metadata['orig_title'] if 'orig_title' in self._metadata else name
         with open(name + ".html", "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write("<title>" + html.escape(orig_title) + "</title>\n")

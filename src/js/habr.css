@@ -1,3 +1,4 @@
+@charset "utf-8";
 body {
     font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     box-sizing: border-box;
@@ -231,8 +232,18 @@ div.dl-info dt {grid-column-start: 1; font-style: italic; color:#333; text-align
     &:after {content: ": ";}
 }
 div.dl-info dd {grid-column-start: 2; min-width: 50%; margin:0;}
-div.dl-info a { font-size: 0.9rem; text-decoration: none; transition: all 1.5s ease;}
-div.dl-info a:hover {text-decoration: underline; }
+div.dl-info a {
+    font-size: 0.9rem; text-decoration: none; position: relative;
+    &:hover, &:focus {
+        text-decoration: underline; color: #000;
+        background: hsl(75 100% 70%);
+        transition: all 0.5s ease-in-out;
+    }
+    &:before {
+    }
+    &:hover:before {
+    }
+}
 div.dl-info time {
     border: 1px solid #fff8dc;
     background-color: #fff;
