@@ -292,14 +292,15 @@ class HabrArticleDownloader():
                     print(link.get('data-src'), ' | ', article_name, file=f)
 
     def define_numer_of_pages(self, url, type_articles):
+        """type_aticles: ['publications', 'fav', 's', 'followers']"""
         r = requests.get(url)
         url_soup = BeautifulSoup(r.text, 'lxml')
         #spans = url_soup.find_all("span", {"class": "tm-tabs__tab-counter"})
         spans = url_soup.find_all("span", {"class": "tm-tabs__tab-item"})
         
-        if type_articles == 'u':
+        if type_articles == 'publications':
             span = spans[1]
-        elif type_articles == 'f':
+        elif type_articles == 'fav':
             span = spans[3]
         elif type_articles == 's':
             span = spans[1]
@@ -309,67 +310,86 @@ class HabrArticleDownloader():
         number_of_pages = math.ceil(int(span_value)/20)
         return number_of_pages
 
+    def getAuthorFullInfo(self, nickname: str):
+        """Scan profile and return full info dict with own publications details and favorites details"""
+        _baseurl = '/'.join([HABR_TITLE, 'ru', 'users', nickname])
+        pub_url = _baseurl + '/publications/articles/'
+        fav_url = _baseurl + '/bookmarks/articles/'
+        _info = {'publications':[], 'favorites': []}
+        #own publications
+        _info['publications'] = self.userProfileSubScan(pub_url, 'publications')
+        _info['favorites'] = self.userProfileSubScan(fav_url, 'fav')
+        return _info
 
-    def get_articles(self, url, type_articles):
-        number_of_pages = self.define_numer_of_pages(url, type_articles)
-        try:
-            r = requests.get(url)
-        except requests.exceptions.RequestException:
-            print("[error]: Ошибка получения статей: ", url)
-            return
+    def userProfileSubScan(self, scan_url: str, page_type: str):
+        """helper function to find article snippets on given user profile tab"""
+        _ret = []
+        num_pages = self.define_numer_of_pages(scan_url, page_type)
+        for page in range(1, num_pages + 1):
+            page_url = scan_url + ("page" + str(page) if page > 1 else '')
+            try:
+                r = requests.get(page_url)
+            except requests.exceptions.RequestException:
+                print(f"[error]: Ошибка получения страницы из списка статей: {page_url}")
+                continue
+            url_soup = BeautifulSoup(r.text, 'lxml')
+            snipppets = url_soup.find('div', {'class':'tm-articles-list'}).findAll('article', {'class':'tm-articles-list__item'})
+            _ret += self.parseArticleSnippets(snipppets)
+        return _ret
 
-        url_soup = BeautifulSoup(r.text, 'lxml')
-        posts = url_soup.findAll('a', {'class': 'tm-title__link'})
-        self.posts += posts
-        if number_of_pages > 1: 
-            for page in range(2, number_of_pages + 1):
-                try:
-                    r = requests.get(url + "page" + str(page))
-                except requests.exceptions.RequestException:
-                    print("[error]: Ошибка получения последующих страниц из списка статей: ", url)
-                    return
+    def parseArticleSnippets(self, bs):
+        """Parse array of BeautifulSoup <article> elements and return dict with article id, title and author"""
+        _ret = []
+        for art in bs:
+            snip = art.find('div', class_='tm-article-snippet')
+            #если сниппет пустой - мы в рекламной вставке на новость компании. Пропускаем
+            if snip is None:
+                continue
+            info = {'id': art['id']}
+            info.update({
+                'author': snip.find('div', class_='tm-article-snippet__meta-container').find('a', class_='tm-user-info__username').text
+                })
+            info.update({
+                'date': snip.find('div', class_='tm-article-snippet__meta-container').find('time').get('datetime')[:10]
+                })
+            info.update({
+                'url': snip.find('a', class_='tm-title__link').get('href')
+                })
+            info.update({
+                'title': snip.find('a', class_='tm-title__link').find('span').text
+                })
+            if info['url'].startswith('/ru/'):
+                info['url'] = HABR_TITLE + info['url']
+            # hub_link = snip.findAll('a', class_='tm-publication-hub__link')
+            # for ln in hub_link:
+            #     if ln.find('span') and ln.find('span').text.startswith('Блог компании '):
+            #         info['companyBlog'] = ln.find('span').text[14:]
 
-                url_soup = BeautifulSoup(r.text, 'lxml')
-                posts = url_soup.findAll('a', {'class': 'tm-title__link'})
-                self.posts += posts
+            _ret += [info]
+        return _ret
 
 
-    def parse_articles(self, type_articles):
-        print(f"[info]: Будет загружено: {len(self.posts)} статей.")
-
-        for i in range(0, len(self.posts)):
-            p = self.posts[i]
-            if not args.quiet:
-                print(f"[info]: Скачивается ({i}/{len(self.posts)}):", p.text)
-
-            name = self.dir_cor_name(p.text)
-
-            dir_path = '{:03}'.format(len(self.posts) - i) + " " + name
-
-            # создаем директории с названиями статей
-            # self.create_dir(dir_path)
-            # заходим в директорию статьи
-            # os.chdir(dir_path)
-
-            self.get_article(HABR_TITLE + p.get('href'), name)
-
-            # выходим из директории статьи
-            # os.chdir('../')
-
-    def main(self, url, dir, type_articles):
+    def main(self, nickname, dir, type_articles):
         # создаем папку для статей
         self.create_dir(dir)
         os.chdir(dir)
 
+        profile = self.getAuthorFullInfo(nickname)
+        if type_articles == 'u':
+            pubs = profile['publications']
+        else:
+            pubs = profile['favorites']
+        art_index = 0
         # создаем папку с именем автора
-        self.dir_author = url.split('/')[5]
-        self.create_dir(self.dir_author)
-        os.chdir(self.dir_author)
-
-        self.get_articles(url, type_articles)
-
-        self.parse_articles(type_articles)
-
+        self.create_dir(nickname)
+        os.chdir(nickname)
+        for art in pubs:
+            print(f"[info]: Статья ({art_index}/{len(pubs)}) {art['title']}")
+            try:
+                self.get_article(art['url'], art['title'])
+            except Exception as e:
+                print(f"[error]: Ошибка обработки {art['url']}")
+            art_index += 1
         os.chdir('../')
 
 
@@ -532,15 +552,14 @@ if __name__ == '__main__':
     type_articles = None
 
     if args.user_name_for_articles:
-        output_name = args.user_name_for_articles + "/publications/articles/"
+        nickname = args.user_name_for_articles
         output = DIR_ARCTICLE
         type_articles = 'u'
     elif args.user_name_for_favorites:
-        output_name = args.user_name_for_favorites + "/bookmarks/articles/"
+        nickname = args.user_name_for_favorites
         output = DIR_FAVORITES
         type_articles = 'f'
     else:
-        output_name = args.article_id
         type_articles = 's'
         output = DIR_SINGLES
 
@@ -548,7 +567,7 @@ if __name__ == '__main__':
     start_time = datetime.now()
     try:
         if not args.article_id:
-            habrSD.main("https://habr.com/ru/users/" + output_name, output, type_articles)
+            habrSD.main(nickname, output, type_articles)
             if not args.no_index:
                 index = IndexBuilder()
                 # index.indexAuthor(args.user_name_for_articles)
@@ -575,7 +594,7 @@ if __name__ == '__main__':
                 print(ex)
     except Exception as ex:
         import traceback
-        print("[error]: Ошибка получения данных от :", output_name)
+        print("[error]: Ошибка получения данных")
         print(traceback.format_exc())
     end_time = datetime.now()
     print('Затраченное время: {}'.format(end_time - start_time))
