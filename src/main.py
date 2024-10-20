@@ -22,6 +22,9 @@ from datetime import datetime
 
 import concurrent.futures
 
+import networkx as nx
+import json
+
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
 DIR_PICTURE = 'picture'
@@ -78,6 +81,22 @@ def copy_jsdir(dir):
                 dirs_exist_ok=True)
     except OSError:
         print("[error]: Ошибка копирования директории: {}".format(ddir))
+
+def copy_visjs(dir):
+    """copy necessary vis.js scripts, css, options etc"""
+    ddir = os.path.join(dir,'js')
+    src_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js', 'visjs')
+    if not os.path.exists(ddir):
+        os.makedirs(ddir)
+    try:
+        for file in ['vis.min.js', 'vis.min.css']:
+            shutil.copy(os.path.join(src_dir,file), ddir)
+    except shutil.SameFileError:
+        pass
+    except PermissionError:
+        print("[error]: Не хватает прав для копирования библиотеки отображения графов")
+    except Exception as e:
+        print("[error]: Ошибка копирования библиотеки отображения графов", e)
 
 
 class HabrArticleDownloader():
@@ -292,7 +311,7 @@ class HabrArticleDownloader():
                     print(link.get('data-src'), ' | ', article_name, file=f)
 
     def define_numer_of_pages(self, url, type_articles):
-        """type_aticles: ['publications', 'fav', 's', 'followers']"""
+        """type_aticles: ['publications', 'bookmarks', 's', 'followers']"""
         r = requests.get(url)
         url_soup = BeautifulSoup(r.text, 'lxml')
         #spans = url_soup.find_all("span", {"class": "tm-tabs__tab-counter"})
@@ -300,13 +319,13 @@ class HabrArticleDownloader():
         
         if type_articles == 'publications':
             span = spans[1]
-        elif type_articles == 'fav':
+        elif type_articles == 'bookmarks':
             span = spans[3]
         elif type_articles == 's':
             span = spans[1]
         
         span = span.find('span')
-        span_value = re.sub(r'[^0-9]', '', span.text)
+        span_value = re.sub(r'[^0-9]', '', span.text) if span else 0
         number_of_pages = math.ceil(int(span_value)/20)
         return number_of_pages
 
@@ -315,13 +334,14 @@ class HabrArticleDownloader():
         _baseurl = '/'.join([HABR_TITLE, 'ru', 'users', nickname])
         pub_url = _baseurl + '/publications/articles/'
         fav_url = _baseurl + '/bookmarks/articles/'
-        _info = {'publications':[], 'favorites': []}
+        follow_url = _baseurl + '/followers/'
+        _info = {'publications':[], 'bookmarks': []}
         #own publications
-        _info['publications'] = self.userProfileSubScan(pub_url, 'publications')
-        _info['favorites'] = self.userProfileSubScan(fav_url, 'fav')
+        _info['publications'] = self.userProfileArticleSubScan(pub_url, 'publications')
+        _info['bookmarks'] = self.userProfileArticleSubScan(fav_url, 'bookmarks')
         return _info
 
-    def userProfileSubScan(self, scan_url: str, page_type: str):
+    def userProfileArticleSubScan(self, scan_url: str, page_type: str):
         """helper function to find article snippets on given user profile tab"""
         _ret = []
         num_pages = self.define_numer_of_pages(scan_url, page_type)
@@ -347,7 +367,7 @@ class HabrArticleDownloader():
                 continue
             info = {'id': art['id']}
             info.update({
-                'author': snip.find('div', class_='tm-article-snippet__meta-container').find('a', class_='tm-user-info__username').text
+                'author': snip.find('div', class_='tm-article-snippet__meta-container').find('a', class_='tm-user-info__username').text.strip()
                 })
             info.update({
                 'date': snip.find('div', class_='tm-article-snippet__meta-container').find('time').get('datetime')[:10]
@@ -356,7 +376,7 @@ class HabrArticleDownloader():
                 'url': snip.find('a', class_='tm-title__link').get('href')
                 })
             info.update({
-                'title': snip.find('a', class_='tm-title__link').find('span').text
+                'title': snip.find('a', class_='tm-title__link').find('span').text.strip()
                 })
             if info['url'].startswith('/ru/'):
                 info['url'] = HABR_TITLE + info['url']
@@ -378,19 +398,82 @@ class HabrArticleDownloader():
         if type_articles == 'u':
             pubs = profile['publications']
         else:
-            pubs = profile['favorites']
-        art_index = 0
-        # создаем папку с именем автора
-        self.create_dir(nickname)
-        os.chdir(nickname)
-        for art in pubs:
-            print(f"[info]: Статья ({art_index}/{len(pubs)}) {art['title']}")
-            try:
-                self.get_article(art['url'], art['title'])
-            except Exception as e:
-                print(f"[error]: Ошибка обработки {art['url']}")
-            art_index += 1
-        os.chdir('../')
+            pubs = profile['bookmarks']
+        # создаем папку с именем автора, если есть публикации
+        if len(pubs):
+            self.create_dir(nickname)
+            os.chdir(nickname)
+            for art_index, art in enumerate(pubs, start=1):
+                print(f"[info]: Статья ({art_index}/{len(pubs)}) {art['title']}")
+                try:
+                    self.get_article(art['url'], art['title'])
+                except Exception as e:
+                    print(f"[error]: Ошибка обработки {art['url']}")
+            os.chdir('../')
+
+        print("[info]: Построение графа связей")
+        _graph_file = os.path.join('graph', 'graph.json')
+        try:
+            if os.path.exists( _graph_file):
+                with open(_graph_file) as json_data:
+                    G = nx.node_link_graph(json.load(json_data), edges="edges", source="from", target="to")
+            else:
+                G = nx.DiGraph()
+        except Exception as e:
+            print(f"[error]: Ошибка чтения ранее сохраненного графа {_graph_file}")
+            print(e)
+            G = nx.DiGraph()
+        #удаляем закладки на самого себя, чтоб избежать петель в графе
+        profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
+        G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
+        G.add_node(
+            nickname,
+            label=nickname, group='author',
+            title=f'Публикаций:{len(profile["publications"])}<br/>Закладок:{len(profile["bookmarks"])}')
+        G.add_edges_from( [(nickname,x['author']) for x in profile['bookmarks']] )
+        self.create_dir('graph')
+        self.create_dir(os.path.join('graph','js'))
+        # nx.write_adjlist(G, os.path.join('graph', 'test.adjlist'))
+        gdata = nx.node_link_data(G, edges="edges", source="from", target="to")
+        with open(_graph_file, "w", encoding="UTF-8") as fd:
+            fd.write( json.dumps(gdata) )
+        with open(os.path.join('graph', 'js', 'graph_data.js'), "w", encoding="UTF-8") as fd:
+            fd.write('"use strict";\n\n')
+            fd.write('var graph_json = ' + json.dumps(gdata))
+        with open(os.path.join('graph', 'index.html'), "w", encoding="UTF-8") as fd:
+            fd.write("""
+<!doctype html>
+<HTML>
+<HEAD>
+  <meta charset="utf-8" />
+  <TITLE>Граф связей</TITLE>
+
+  <script type="text/javascript" src="js/vis.min.js"></script>
+  <script type="text/javascript" src="js/graph_data.js"></script>
+  <link rel="stylesheet" type="text/css" href="js/vis.min.css">
+  <style type="text/css">
+    #mynetwork {
+        width: 100%;
+        height: 800px;
+        border: 2px solid lightgray;
+    }
+    </style>
+</HEAD>
+
+<BODY>
+<div id="mynetwork"></div>
+<script type="text/javascript">
+var container = document.getElementById('mynetwork');
+var data = {
+  nodes: graph_json.nodes,
+  edges: graph_json.edges
+};
+var network = new vis.Network(container, data, visjs_options);
+</script>
+</BODY>
+</HTML>""")
+        copy_visjs(os.path.join('.','graph'))
+
 
 
 class IndexBuilder():
@@ -417,7 +500,7 @@ class IndexBuilder():
     def authorsInDir(self, dirpath='.'):
         a_list = [
             os.path.join(dirpath,f) for f in natsort.os_sorted(os.listdir(dirpath))
-                if os.path.isdir(os.path.join(dirpath,f)) and f != 'js'
+                if os.path.isdir(os.path.join(dirpath,f)) and f != 'js' and f != 'graph'
             ]
         return [os.path.basename(p) for p in a_list]
 
@@ -502,7 +585,7 @@ class IndexBuilder():
         self.make_index(dirpath=dirpath, with_authors_list=True)
 
     def indexCatalogue(self, dirpath='.'):
-        """Top-level index.html for -u and -f run args"""
+        """Top-level index.html for -u and -b run args"""
         a_list = natsort.natsorted( self.authorsInDir(dirpath) )
         print("[info]: Построение индексов для %i каталогов авторов" % len(a_list))
         a_meta = {}
@@ -543,8 +626,8 @@ if __name__ == '__main__':
     parser.add_argument('--no-index', help="Не создавать файл index.html", action='store_true')
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-u', help="Скачать статьи пользователя", type=str, dest='user_name_for_articles')
-    group.add_argument('-f', help="Скачать закладки пользователя", type=str, dest='user_name_for_favorites')
+    group.add_argument('-u', '--user-publications', help="Скачать статьи пользователя", type=str, dest='user_name_for_articles')
+    group.add_argument('-b', '--user-bookmarks', help="Скачать закладки пользователя", type=str, dest='user_name_for_bookmarks')
     group.add_argument('-s', help="Скачать одиночные статьи (список ID через запятую)", type=str, dest='article_id')
 
     args = parser.parse_args()
@@ -555,10 +638,10 @@ if __name__ == '__main__':
         nickname = args.user_name_for_articles
         output = DIR_ARCTICLE
         type_articles = 'u'
-    elif args.user_name_for_favorites:
-        nickname = args.user_name_for_favorites
+    elif args.user_name_for_bookmarks:
+        nickname = args.user_name_for_bookmarks
         output = DIR_FAVORITES
-        type_articles = 'f'
+        type_articles = 'b'
     else:
         type_articles = 's'
         output = DIR_SINGLES

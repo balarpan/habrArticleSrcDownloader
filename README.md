@@ -74,9 +74,9 @@ options:
   --no-meta-information
                         Не добавить мета-информацию о статье на экран
   --no-index            Не создавать файл index.html
-  -u USER_NAME_FOR_ARTICLES
+  -u USER_NAME_FOR_ARTICLES, --user-publications USER_NAME_FOR_ARTICLES
                         Скачать статьи пользователя
-  -f USER_NAME_FOR_FAVORITES
+  -b USER_NAME_FOR_BOOKMARKS, --user-bookmarks USER_NAME_FOR_BOOKMARKS
                         Скачать закладки пользователя
   -s ARTICLE_ID         Скачать одиночные статьи (список ID через запятую)
 ```
@@ -87,7 +87,7 @@ options:
 ./src/main.py -u jessy_james
 ```
 ```bash
-./src/main.py -f jessy_james
+./src/main.py -b jessy_james
 ```
 ```bash
 ./src/main.py -s 665254,809021
