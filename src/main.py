@@ -24,6 +24,7 @@ import concurrent.futures
 
 import networkx as nx
 import json
+import hashlib
 
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
@@ -378,6 +379,9 @@ class HabrArticleDownloader():
             info.update({
                 'title': snip.find('a', class_='tm-title__link').find('span').text.strip()
                 })
+            info.update({
+                'titleMD5': hashlib.md5(info['title'].encode("utf-8")).hexdigest()
+                })
             if info['url'].startswith('/ru/'):
                 info['url'] = HABR_TITLE + info['url']
             # hub_link = snip.findAll('a', class_='tm-publication-hub__link')
@@ -426,11 +430,18 @@ class HabrArticleDownloader():
         #удаляем закладки на самого себя, чтоб избежать петель в графе
         profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
         G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
+        G.add_nodes_from( [(x['titleMD5'],{
+            'title':f'<span>{x["title"]}</span><br />Автор: <span class="author">{x["author"]}</span>',
+            'group':'post', 'shape':'circle',
+            'url': x['url']
+            }) for x in profile['bookmarks']])
         G.add_node(
             nickname,
             label=nickname, group='author',
             title=f'Публикаций:{len(profile["publications"])}<br/>Закладок:{len(profile["bookmarks"])}')
-        G.add_edges_from( [(nickname,x['author']) for x in profile['bookmarks']] )
+        # G.add_edges_from( [(nickname,x['author']) for x in profile['bookmarks']] )
+        G.add_edges_from( [(nickname,x['titleMD5'], {'relation':'bookmark', 'title':'закладка'}) for x in profile['bookmarks']] )
+        G.add_edges_from( [(x['titleMD5'],x['author'], {'relation':'post_author','color': { 'color': "blue" }}) for x in profile['bookmarks']] )
         self.create_dir('graph')
         self.create_dir(os.path.join('graph','js'))
         # nx.write_adjlist(G, os.path.join('graph', 'test.adjlist'))
@@ -452,11 +463,7 @@ class HabrArticleDownloader():
   <script type="text/javascript" src="js/graph_data.js"></script>
   <link rel="stylesheet" type="text/css" href="js/vis.min.css">
   <style type="text/css">
-    #mynetwork {
-        width: 100%;
-        height: 800px;
-        border: 2px solid lightgray;
-    }
+    #mynetwork {width: 100%; height: 800px; border: 2px solid lightgray;}
     </style>
 </HEAD>
 
@@ -598,6 +605,8 @@ class IndexBuilder():
         with open(os.path.join(dirpath,"index.html"), "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write('</head><body>\n\n')
+            if os.path.exists(os.path.join('graph','index.html')):
+                fd.write('<div class="graph_link"><a href="graph/index.html" target="_blank">Открыть граф связей</a></div>\n')
             fd.write('<div class="art_index_cnt authorsCatalogue"><p class="art_index_h1">Перечень авторов и количества статей:</p>\n')
 
             fd.write('<div class="index_author_srch_cnt"></div>\n')
