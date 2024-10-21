@@ -196,6 +196,26 @@ ul.art_index li .post_date {
     &:hover { transform: scale(1.125); }
 }
 
+/* link to graph */
+.graph_link {
+    height:1.3rem; line-height: 1.3rem; float: right;
+    font-size: 0.75rem; margin: 10px;
+    outline:none;
+    background-color:#f4f5f6; border-radius: 7px; border: none;
+    box-shadow:  -5px -5px 15px #fff, 5px 5px 15px #fff, inset 5px 5px 10px #f3f3f3, inset -5px -5px 10px #d1d1d1;
+    transition: all .13s ease-in-out;
+    &:hover { box-shadow: 0px 5px 20px 5px rgba(24, 66, 154, 0.52); }
+}
+.graph_link > a {
+    padding:0.9rem; text-decoration: none; color:#444;
+    &:before {
+        content: '';
+        background-image: url(img/network-graph-ico.svg);
+        background-repeat: no-repeat;
+        height: 0.65rem; width: 0.65rem; display:inline-block;
+        padding-right: 5px;
+    }
+}
 /* info box with downloaded metadata */
 div.dl-info-cnt {
     margin:0 0 0 2px; padding:0;border:0;

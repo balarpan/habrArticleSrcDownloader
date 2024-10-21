@@ -466,8 +466,10 @@ class HabrArticleDownloader():
     </style>
 </HEAD>
 <BODY>
-<div class="progressbar_cnt"><div class="progressbar"></div></div>
-<div id="mynetwork"></div>
+<div id="mynetwork_cnt">
+  <div id="netprogress" class="progressbar_cnt"><div class="progressbar"></div></div>
+  <div id="mynetwork"></div>
+</div>
 </BODY>
 </HTML>""")
         copy_visjs(os.path.join('.','graph'))

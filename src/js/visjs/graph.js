@@ -81,7 +81,7 @@ var visjs_options = {
     },
     forceAtlas2Based: {
       gravitationalConstant: -50,
-      centralGravity: 0.01,
+      centralGravity: 0.005,
       springConstant: 0.08,
       springLength: 100,
       damping: 0.4,
@@ -145,17 +145,31 @@ window.addEventListener('load', function () {
   var network = new vis.Network(container, data, visjs_options);
 
   network.on("stabilizationProgress", function (params) {
-    const progress = document.querySelector(".progressbar_cnt");
+    const progress = document.getElementById('netprogress');
     const value = parseInt(params.iterations / params.total * 100)
-    progress.style.setProperty("--progress", `${value}%`);
+    progress.style.setProperty("--progressbar", `${value}%`);
   });
+
   network.once("stabilizationIterationsDone", function () {
-    const progress = document.querySelector(".progressbar_cnt");
-    progress.style.setProperty("--progress", `100%`);
-    // progress.style.opacity = 0;
-    setTimeout(function () {
-      document.querySelector(".progressbar_cnt").style.display = "none";
-    }, 500);
+    const progress = document.getElementById('netprogress');
+    progress.style.setProperty("--progressbar", `100%`);
+    progress.style.opacity = 0;
+    setTimeout(function (progress) {
+      progress.style.display = "none";
+    }.bind(null,progress), 500);
   });
+
+  // network.on("select", function (params) {
+  //   params.event = "[original event]";
+  //   // document.getElementById("eventSpanHeading").innerText = "Click event:";
+  //   // document.getElementById("eventSpanContent").innerText = JSON.stringify(
+  //   //   params,
+  //   //   null,
+  //   //   4
+  //   // );
+  //   console.log("select event, getNodeAt returns: " +
+  //       this.getNodeAt(params.pointer.DOM));
+  //   console.log( network.getSelection())
+  // });
 
 });
