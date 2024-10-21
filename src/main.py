@@ -90,7 +90,7 @@ def copy_visjs(dir):
     if not os.path.exists(ddir):
         os.makedirs(ddir)
     try:
-        for file in ['vis.min.js', 'vis.min.css']:
+        for file in ['vis.min.js', 'vis.min.css', 'graph.js']:
             shutil.copy(os.path.join(src_dir,file), ddir)
     except shutil.SameFileError:
         pass
@@ -432,7 +432,7 @@ class HabrArticleDownloader():
         G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
         G.add_nodes_from( [(x['titleMD5'],{
             'title':f'<span>{x["title"]}</span><br />Автор: <span class="author">{x["author"]}</span>',
-            'group':'post', 'shape':'circle',
+            'group':'post', 'shape':'circle', 'size': 1,
             'url': x['url']
             }) for x in profile['bookmarks']])
         G.add_node(
@@ -441,7 +441,7 @@ class HabrArticleDownloader():
             title=f'Публикаций:{len(profile["publications"])}<br/>Закладок:{len(profile["bookmarks"])}')
         # G.add_edges_from( [(nickname,x['author']) for x in profile['bookmarks']] )
         G.add_edges_from( [(nickname,x['titleMD5'], {'relation':'bookmark', 'title':'закладка'}) for x in profile['bookmarks']] )
-        G.add_edges_from( [(x['titleMD5'],x['author'], {'relation':'post_author','color': { 'color': "blue" }}) for x in profile['bookmarks']] )
+        G.add_edges_from( [(x['titleMD5'],x['author'], {'relation':'post_author','color': {'inherit': True}}) for x in profile['bookmarks']] )
         self.create_dir('graph')
         self.create_dir(os.path.join('graph','js'))
         # nx.write_adjlist(G, os.path.join('graph', 'test.adjlist'))
@@ -452,31 +452,22 @@ class HabrArticleDownloader():
             fd.write('"use strict";\n\n')
             fd.write('var graph_json = ' + json.dumps(gdata))
         with open(os.path.join('graph', 'index.html'), "w", encoding="UTF-8") as fd:
-            fd.write("""
-<!doctype html>
+            fd.write("""<!doctype html>
 <HTML>
 <HEAD>
   <meta charset="utf-8" />
   <TITLE>Граф связей</TITLE>
-
   <script type="text/javascript" src="js/vis.min.js"></script>
   <script type="text/javascript" src="js/graph_data.js"></script>
+  <script type="text/javascript" src="js/graph.js"></script>
   <link rel="stylesheet" type="text/css" href="js/vis.min.css">
   <style type="text/css">
     #mynetwork {width: 100%; height: 800px; border: 2px solid lightgray;}
     </style>
 </HEAD>
-
 <BODY>
+<div class="progressbar_cnt"><div class="progressbar"></div></div>
 <div id="mynetwork"></div>
-<script type="text/javascript">
-var container = document.getElementById('mynetwork');
-var data = {
-  nodes: graph_json.nodes,
-  edges: graph_json.edges
-};
-var network = new vis.Network(container, data, visjs_options);
-</script>
 </BODY>
 </HTML>""")
         copy_visjs(os.path.join('.','graph'))
