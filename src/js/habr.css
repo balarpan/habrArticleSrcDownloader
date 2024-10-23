@@ -204,7 +204,7 @@ ul.art_index li .post_date {
     background-color:#f4f5f6; border-radius: 7px; border: none;
     box-shadow:  -5px -5px 15px #fff, 5px 5px 15px #fff, inset 5px 5px 10px #f3f3f3, inset -5px -5px 10px #d1d1d1;
     transition: all .13s ease-in-out;
-    &:hover { box-shadow: 0px 5px 20px 5px rgba(24, 66, 154, 0.52); }
+    &:hover { box-shadow: 0px 5px 20px 5px rgba(24, 66, 154, 0.42); }
 }
 .graph_link > a {
     padding:0.9rem; text-decoration: none; color:#444;

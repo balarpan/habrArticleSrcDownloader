@@ -461,6 +461,7 @@ class HabrArticleDownloader():
   <script type="text/javascript" src="js/graph_data.js"></script>
   <script type="text/javascript" src="js/graph.js"></script>
   <link rel="stylesheet" type="text/css" href="js/vis.min.css">
+  <link rel="stylesheet" type="text/css" href="js/graph.css">
   <style type="text/css">
     #mynetwork {width: 100%; height: 600px; border: 2px solid lightgray; background: #fff;}
     </style>

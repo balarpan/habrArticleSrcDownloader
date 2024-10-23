@@ -1,0 +1,120 @@
+/* progress bar */
+@property --progressbar {
+  syntax: "<length>";
+  initial-value: 0%;
+  inherits: true;
+}
+.progressbar_cnt {
+	--progressbar: 0%;
+	 
+	 width: 12rem; height: 30px;
+	 position: absolute; left: 1.2rem; z-index: 999;
+	 box-sizing: border-box;
+	 margin: 1rem auto; padding: 9px 10px;
+	 border: 1px solid #fff; box-shadow: 0 0 10px #aaa;
+	 transition: opacity 0.5s ease;
+}
+.progressbar_cnt .progressbar {
+	width: 100%;
+	position: relative;
+	height: 100%;
+	border-radius: 4px; overflow: hidden;
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, .3);
+	&:before {
+		content: '';
+		position: absolute;
+		width: var(--progressbar); transition: width 2s ease;
+		height: 100%;
+		margin:0; padding: 0;
+		background: linear-gradient(#b3daed, #a8dcf6, #87b7d0);
+		background-repeat: repeat;
+	}
+}
+
+.author {
+    color:#257c74;
+    &:before {
+        content: '';
+        display:inline-block;
+        height:0.95em; width:0.95em;
+        vertical-align: baseline;
+        background-size: 0.95em 0.95em;
+        background-image: url(img/icon-pencil.svg);
+        background-repeat: no-repeat;
+    }
+}
+.company_name { color: #5b25f0; }
+
+/*search box */
+.index_srch_cnt {margin: 0 1rem 0 1em;}
+#srch-author.index_srch_cnt { width:18rem; }
+.index_srch_cnt input[type=text] {
+    color: #3f505e;
+    background: #fff;
+    border:none; border-radius: 25px;
+    height:1.6rem; line-height: 1.6rem;
+    padding: 0.35em 1.45em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none !important;
+    appearance: none;
+    box-shadow:  3px 3px 5px 0 rgba(255,255,255,.3), -3px -3px 5px 0 rgba(116, 125, 136, .2),
+			    inset -3px -3px 5px 0 rgba(255,255,255,.2), inset 3px 3px 5px 0 rgba(0, 0, 0, .2);
+
+    &::placeholder {
+        color: #6d7f8f;
+      }
+    &:focus, &:hover, &:active:focus,{
+        outline: 0 none !important;
+        -webkit-appearance: none;
+        color: #3f505e;
+        background-color: #f3f9ff;
+      }
+}
+.index_srch_cnt .search-btn {
+    position:relative; display: inline-block;
+    vertical-align: middle;
+    margin: 0 0 0 0.3rem;
+    align-items: center; justify-content: center;
+    transition: all .3s ease;
+    &:hover { transform: scale(1.125); }
+}
+
+.network-info-cnt {
+	margin:0; padding:0; border:0;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+}
+
+.ni-pane {
+	margin: 10px; padding:1.2rem;
+	border: none; background: #e2e9f4; border-radius: 4px;
+	flex: 2 0 auto;
+}
+
+.ni-bump-pane {
+	border-radius: 10px;
+/*	background: linear-gradient(-67deg, rgba(200,216,231,.7), rgba(255,255,255,.8));*/
+	overflow: hidden;
+	box-shadow: -2px -2px 6px rgba(255,255,255,.6),	2px 2px 12px #c8d8e7;
+	padding:0.8rem; margin:10px;
+}
+.ni-pane.srch-pane { flex: 0 0 auto; }
+.srch-results-cnt {
+	height: 10rem;
+	width: 20rem;
+}
+.srch-results { width: 100%; height: 100%; overflow-x: hidden; overflow-y: auto; }
+.srch-results > * {
+	cursor: pointer;
+	transition: all 0.5s;
+	&:focus, &:active {
+		color: red;
+		transition: 0s;}
+}
+.sel-info-pane A {
+	text-decoration: none; border-bottom: 1px solid #aaaaff;
+	&:hover, &:focus {border-bottom: 1px solid #171768;}
+}
+.sel-info-pane DD.author {cursor: pointer;}

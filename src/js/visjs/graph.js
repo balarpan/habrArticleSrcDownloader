@@ -158,7 +158,6 @@ window.addEventListener('load', function () {
     if (authorSrchValue === "") {
       return true;
     }
-    console.log(node,node.group, authorSrchValue);
     switch (node.group) {
       case "author":
         // return node.title === authorSrchValue;
@@ -190,18 +189,14 @@ window.addEventListener('load', function () {
     setTimeout(function (progress) {
       progress.style.display = "none";
     }.bind(null,progress), 500);
+    //in case we opened with browser "back button" which stores history of input values
+    author_srchbox.dispatchEvent(new Event("input"));
   });
 
   network.on("select", function (params) {
     if (!network.getSelectedNodes().length) return;
     const selnode = nodes.get( network.getSelectedNodes()[0] )
     params.event = "[original event]";
-    // document.getElementById("eventSpanHeading").innerText = "Click event:";
-    // document.getElementById("eventSpanContent").innerText = JSON.stringify(
-    //   params,
-    //   null,
-    //   4
-    // );
     if (selnode.group && selnode.group == 'post') {
       infodiv.innerHTML = `<dl>
         <dt>Статья</dt><dd><a href="../${selnode.localName}">${selnode.title}</a></dd>
@@ -231,6 +226,7 @@ window.addEventListener('load', function () {
     found.forEach( (item) => {newres += `<pre class="author">${item.label}</pre>`})
     authorSrchResults.innerHTML = newres;
   });
+  
   authorSrchResults.addEventListener("click", (e) => {
     if (e.target['tagName'] !== "PRE")
       return;
