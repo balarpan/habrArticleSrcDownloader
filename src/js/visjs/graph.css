@@ -105,7 +105,7 @@
 	height: 10rem;
 	width: 20rem;
 }
-.srch-results { width: 100%; height: 100%; overflow-x: hidden; overflow-y: auto; }
+.srch-results { width: 100%; height: 100%; overflow-x: hidden; overflow-y: auto; text-overflow: ellipsis; }
 .srch-results > * {
 	cursor: pointer;
 	transition: all 0.5s;
@@ -118,3 +118,4 @@
 	&:hover, &:focus {border-bottom: 1px solid #171768;}
 }
 .sel-info-pane DD.author {cursor: pointer;}
+#selnodeinfo DT {font-weight: bold; color: #2e2e2e; margin-top: 0.8em; &:after{content: ':';} }

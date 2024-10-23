@@ -88,7 +88,12 @@ ul.art_index li > span { flex: 0 1 auto; text-align: center; text-wrap: nowrap;}
 ul.art_index li > span:last-child {flex: 0 0 auto; text-align: right;}
 
 /*ul.art_index li:hover {background: linear-gradient( to right, #ff9800 0%, #ff9800 5px, transparent);}*/
-ul.art_index li > span.art_translation:after {content: url(img/trans_ico.svg); width: 1.05rem; display: inline-block;}
+ul.art_index li > span.art_translation:after {
+    content: url(img/trans_ico.svg);
+    width: 1em; margin-left: 0.35em; 
+    display: inline-block;
+    position: absolute;
+}
 ul.art_index a {
     text-decoration: none;
     color:#184393;

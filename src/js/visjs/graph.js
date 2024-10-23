@@ -199,7 +199,7 @@ window.addEventListener('load', function () {
     params.event = "[original event]";
     if (selnode.group && selnode.group == 'post') {
       infodiv.innerHTML = `<dl>
-        <dt>Статья</dt><dd><a href="../${selnode.localName}">${selnode.title}</a></dd>
+        <dt>Статья</dt><dd>${ selnode.localName ? ('<a href="../' + selnode.localName + '">' + selnode.title + '</a>') : selnode.title}</dd>
         <dt>Оригинальная статья</dt><dd><a href="${selnode.url}">Ссылка на оригинал</a></dd>
         <dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>`
     }

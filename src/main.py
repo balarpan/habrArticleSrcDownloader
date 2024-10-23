@@ -431,7 +431,8 @@ class HabrArticleDownloader():
         profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
         G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
         G.add_nodes_from( [(x['titleMD5'],{
-            'title':x['title'], 'author': x['author'], 'localName': nickname + '/' + self.dir_cor_name(x['title']) + '.html',
+            'title':x['title'], 'author': x['author'],
+            'localName': (nickname + '/' + self.dir_cor_name(x['title']) + '.html') if type_articles == 'b' else None ,
             'group':'post', 'shape':'circle', 'size': 1,
             'url': x['url']
             }) for x in profile['bookmarks']])
