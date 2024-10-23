@@ -165,12 +165,12 @@ ul.art_index li .post_date {
 .index_srch_cnt {margin: 0 0 0.7rem 3em;}
 .index_srch_cnt input {
     color: #3f505e;
-    background: #f1f8ff;
+    background: #f1f8ff; border: none;
     border-radius: 0.375em 0 0 0.375em;
     padding: 0.35em 0.45em;
     -webkit-appearance: none;
     -moz-appearance: none;
-    outline: none !important;
+    outline: none;
     appearance: none;
     box-shadow:  3px 3px 5px 0 rgba(255,255,255,.3),
                 -3px -3px 5px 0 rgba(116, 125, 136, .2), 

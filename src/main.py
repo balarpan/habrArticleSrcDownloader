@@ -79,19 +79,19 @@ def copy_jsdir(dir):
             shutil.copytree(
                 os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js'),
                 ddir,
+                ignore=shutil.ignore_patterns('visjs'),
                 dirs_exist_ok=True)
     except OSError:
         print("[error]: Ошибка копирования директории: {}".format(ddir))
 
 def copy_visjs(dir):
-    """copy necessary vis.js scripts, css, options etc"""
+    """copy necessary vis.js scripts, css, options, etc."""
     ddir = os.path.join(dir,'js')
     src_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'js', 'visjs')
     if not os.path.exists(ddir):
         os.makedirs(ddir)
     try:
-        for file in ['vis.min.js', 'vis.min.css', 'graph.js']:
-            shutil.copy(os.path.join(src_dir,file), ddir)
+        shutil.copytree(src_dir, ddir, dirs_exist_ok=True)
     except shutil.SameFileError:
         pass
     except PermissionError:
@@ -431,7 +431,7 @@ class HabrArticleDownloader():
         profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
         G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
         G.add_nodes_from( [(x['titleMD5'],{
-            'title':f'<span>{x["title"]}</span><br />Автор: <span class="author">{x["author"]}</span>',
+            'title':x['title'], 'author': x['author'], 'localName': nickname + '/' + self.dir_cor_name(x['title']) + '.html',
             'group':'post', 'shape':'circle', 'size': 1,
             'url': x['url']
             }) for x in profile['bookmarks']])
@@ -462,13 +462,27 @@ class HabrArticleDownloader():
   <script type="text/javascript" src="js/graph.js"></script>
   <link rel="stylesheet" type="text/css" href="js/vis.min.css">
   <style type="text/css">
-    #mynetwork {width: 100%; height: 800px; border: 2px solid lightgray;}
+    #mynetwork {width: 100%; height: 600px; border: 2px solid lightgray; background: #fff;}
     </style>
 </HEAD>
 <BODY>
-<div id="mynetwork_cnt">
+<div class="mynetwork_cnt">
   <div id="netprogress" class="progressbar_cnt"><div class="progressbar"></div></div>
   <div id="mynetwork"></div>
+</div>
+
+<div class="network-info-cnt">
+
+    <div class="ni-pane srch-pane">
+      <div class="index_srch_cnt">
+        <input type="text" placeholder="Найти автора.." pattern="s+" id="srch-author" >
+      </div>
+      <div class="srch-results-cnt ni-bump-pane"><div id="author-srch-res" class="srch-results"></div></div>
+    </div>
+    <div class="ni-pane sel-info-pane">
+      <div id="selnodeinfo" class="ni-bump-pane"></div>
+    </div>
+
 </div>
 </BODY>
 </HTML>""")

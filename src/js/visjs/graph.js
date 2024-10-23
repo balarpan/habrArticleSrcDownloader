@@ -75,7 +75,7 @@ var visjs_options = {
       centralGravity: 0.3,
       // springLength: 95,
       springLength: 95,
-      springConstant: 0.04,
+      springConstant: 0.07,
       damping: 0.09,
       avoidOverlap: 0
     },
@@ -134,15 +134,48 @@ var visjs_options = {
 };
 
 
+var network = null;
+
+function moveViewToNode(nodeID, markSelected = false) {
+  var pos;
+  try {
+    pos = network.getPosition(nodeID);
+  } catch (err) {
+    return false;
+  }
+  if (markSelected)
+    network.selectNodes( [nodeID]);
+  network.moveTo({position: pos, animation:true, scale: network.getScale() < 0.3 ? 0.8 : undefined});
+  return true;
+}
+
 window.addEventListener('load', function () {
 
-  var container = document.getElementById('mynetwork');
-  var data = {
-    nodes: graph_json.nodes,
-    edges: graph_json.edges
+  const nodes = new vis.DataSet(graph_json.nodes);
+  const edges = new vis.DataSet(graph_json.edges);
+  var authorSrchValue = "";
+  const nodesFilter = (node) => {
+    if (authorSrchValue === "") {
+      return true;
+    }
+    console.log(node,node.group, authorSrchValue);
+    switch (node.group) {
+      case "author":
+        // return node.title === authorSrchValue;
+        return node.label.startsWith(authorSrchValue);
+      default:
+        return false;
+    }
   };
-  console.log("Graph num nodes:", data.nodes.length, ' Graph num edges:', data.edges.length)
-  var network = new vis.Network(container, data, visjs_options);
+  const nodesView = new vis.DataView(nodes, { filter: nodesFilter });
+  const edgesView = new vis.DataView(edges, { });
+  const author_srchbox = document.getElementById("srch-author");
+  const infodiv = document.getElementById('selnodeinfo');
+  const authorSrchResults = document.getElementById('author-srch-res');
+
+  console.log("Graph num nodes:", nodes.length, ' Graph num edges:', edges.length)
+  const container = document.getElementById('mynetwork');
+  network = new vis.Network(container, { nodes: nodesView, edges: edgesView }, visjs_options);
 
   network.on("stabilizationProgress", function (params) {
     const progress = document.getElementById('netprogress');
@@ -159,17 +192,52 @@ window.addEventListener('load', function () {
     }.bind(null,progress), 500);
   });
 
-  // network.on("select", function (params) {
-  //   params.event = "[original event]";
-  //   // document.getElementById("eventSpanHeading").innerText = "Click event:";
-  //   // document.getElementById("eventSpanContent").innerText = JSON.stringify(
-  //   //   params,
-  //   //   null,
-  //   //   4
-  //   // );
-  //   console.log("select event, getNodeAt returns: " +
-  //       this.getNodeAt(params.pointer.DOM));
-  //   console.log( network.getSelection())
-  // });
+  network.on("select", function (params) {
+    if (!network.getSelectedNodes().length) return;
+    const selnode = nodes.get( network.getSelectedNodes()[0] )
+    params.event = "[original event]";
+    // document.getElementById("eventSpanHeading").innerText = "Click event:";
+    // document.getElementById("eventSpanContent").innerText = JSON.stringify(
+    //   params,
+    //   null,
+    //   4
+    // );
+    if (selnode.group && selnode.group == 'post') {
+      infodiv.innerHTML = `<dl>
+        <dt>Статья</dt><dd><a href="../${selnode.localName}">${selnode.title}</a></dd>
+        <dt>Оригинальная статья</dt><dd><a href="${selnode.url}">Ссылка на оригинал</a></dd>
+        <dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>`
+    }
+    else {infodiv.innerHTML =''}
+
+  });
+
+  author_srchbox.addEventListener("input", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    authorSrchValue = e.target.value.trim();
+    if (!authorSrchValue.length) {
+      authorSrchResults.innerHTML = '';
+      return;
+    }
+    // nodesView.refresh();
+    var found = nodes.get({filter: function (item) {
+      if (item.label && item.group && item.group == 'author')
+        return (item.label.startsWith(authorSrchValue));
+      else
+        return false;
+    }});
+    var newres = '';
+    found.forEach( (item) => {newres += `<pre class="author">${item.label}</pre>`})
+    authorSrchResults.innerHTML = newres;
+  });
+  authorSrchResults.addEventListener("click", (e) => {
+    if (e.target['tagName'] !== "PRE")
+      return;
+    const el_id = e.target.innerText;
+    e.stopPropagation();
+    e.preventDefault();
+    moveViewToNode(el_id, true);
+  });
 
 });
