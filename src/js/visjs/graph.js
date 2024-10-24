@@ -198,10 +198,12 @@ window.addEventListener('load', function () {
     const selnode = nodes.get( network.getSelectedNodes()[0] )
     params.event = "[original event]";
     if (selnode.group && selnode.group == 'post') {
-      infodiv.innerHTML = `<dl>
-        <dt>Статья</dt><dd>${ selnode.localName ? ('<a href="../' + selnode.localName + '">' + selnode.title + '</a>') : selnode.title}</dd>
-        <dt>Оригинальная статья</dt><dd><a href="${selnode.url}">Ссылка на оригинал</a></dd>
-        <dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>`
+      let txt = '<dl><dt>Статья</dt><dd>'
+      txt += selnode.localName ? ('<a href="../' + selnode.localName + '">' + selnode.title + '</a>') : selnode.title;
+      txt += `&nbsp;${selnode.bookmarked_count ? ('<span title="Добавили в закладки"><span class="bookmarked">'+selnode.bookmarked_count+'</span></span>') : ''}</dd>`;
+      txt += `<dt>Оригинальная статья</dt><dd><a href="${selnode.url}">Источник</a></dd>`;
+      txt += `<dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>`;
+      infodiv.innerHTML = txt ;
     }
     else {infodiv.innerHTML =''}
 
@@ -210,7 +212,7 @@ window.addEventListener('load', function () {
   author_srchbox.addEventListener("input", (e) => {
     e.stopPropagation();
     e.preventDefault();
-    authorSrchValue = e.target.value.trim();
+    authorSrchValue = e.target.value.trim().toLowerCase();
     if (!authorSrchValue.length) {
       authorSrchResults.innerHTML = '';
       return;
@@ -218,7 +220,7 @@ window.addEventListener('load', function () {
     // nodesView.refresh();
     var found = nodes.get({filter: function (item) {
       if (item.label && item.group && item.group == 'author')
-        return (item.label.startsWith(authorSrchValue));
+        return (item.label.toLowerCase().startsWith(authorSrchValue));
       else
         return false;
     }});
