@@ -198,11 +198,14 @@ window.addEventListener('load', function () {
     const selnode = nodes.get( network.getSelectedNodes()[0] )
     params.event = "[original event]";
     if (selnode.group && selnode.group == 'post') {
-      let txt = '<dl><dt>Статья</dt><dd>'
+      let txt = '<dl><dt>Статья</dt><dd class="dd-title">'
       txt += selnode.localName ? ('<a href="../' + selnode.localName + '">' + selnode.title + '</a>') : selnode.title;
       txt += `&nbsp;${selnode.bookmarked_count ? ('<span title="Добавили в закладки"><span class="bookmarked">'+selnode.bookmarked_count+'</span></span>') : ''}</dd>`;
+      console.log( selnode.pubdate, selnode.pubdate && selnode.pubdate.length>2 )
+      if (selnode.pubdate && selnode.pubdate.length > 2)
+        txt += `<dt>Дата публикации</dt><dd class="dd-pubdate">${selnode.pubdate}</dd>`;
       txt += `<dt>Оригинальная статья</dt><dd><a href="${selnode.url}">Источник</a></dd>`;
-      txt += `<dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>`;
+      txt += `<dt>Автор</dt><dd class="author" onclick="moveViewToNode('${selnode.author}')">${selnode.author}</dd></dl>\n`;
       infodiv.innerHTML = txt ;
     }
     else {infodiv.innerHTML =''}
