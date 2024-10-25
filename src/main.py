@@ -283,7 +283,7 @@ class HabrArticleDownloader():
             self.save_comments(name, str(comment))
 
         if not args.quiet:
-            print(f"[info]: Статья: {name} сохранена")
+            print(f'[info]: Статья "{name}" сохранена')
         return name
 
     def save_pictures(self, pictures):

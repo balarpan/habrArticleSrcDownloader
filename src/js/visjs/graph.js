@@ -119,7 +119,7 @@ var visjs_options = {
       shape: 'circle',
       size: 3,
       color: {
-        border: 'black',
+        border: '#0c0ca5',
         background: 'blue',
         highlight: {border: 'grey', background: 'lightblue'}
       }
@@ -210,7 +210,7 @@ window.addEventListener('load', function () {
   author_srchbox.addEventListener("input", (e) => {
     e.stopPropagation();
     e.preventDefault();
-    authorSrchValue = e.target.value.trim();
+    authorSrchValue = e.target.value.trim().toLowerCase();
     if (!authorSrchValue.length) {
       authorSrchResults.innerHTML = '';
       return;
@@ -218,7 +218,7 @@ window.addEventListener('load', function () {
     // nodesView.refresh();
     var found = nodes.get({filter: function (item) {
       if (item.label && item.group && item.group == 'author')
-        return (item.label.startsWith(authorSrchValue));
+        return (item.label.toLowerCase().startsWith(authorSrchValue));
       else
         return false;
     }});

@@ -26,7 +26,7 @@
 		width: var(--progressbar); transition: width 2s ease;
 		height: 100%;
 		margin:0; padding: 0;
-		background: linear-gradient(#b3daed, #a8dcf6, #87b7d0);
+		background: linear-gradient(#afd5e8, #ade0fa, #7ca7be);
 		background-repeat: repeat;
 	}
 }
