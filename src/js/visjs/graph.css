@@ -119,3 +119,11 @@
 }
 .sel-info-pane DD.author {cursor: pointer;}
 #selnodeinfo DT {font-weight: bold; color: #2e2e2e; margin-top: 0.8em; &:after{content: ':';} }
+.bookmarked {
+	color: #257c74; fill: currentColor;
+	&:before {
+		width: 16px; height:16px; display: inline-block; overflow: hidden;
+		content: url(img/bookmark-fill.svg);
+		color: #257c74; fill: #257c74;
+	}
+}

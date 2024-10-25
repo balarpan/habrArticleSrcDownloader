@@ -362,9 +362,9 @@ class HabrArticleDownloader():
         """Parse array of BeautifulSoup <article> elements and return dict with article id, title and author"""
         _ret = []
         for art in bs:
-            snip = art.find('div', class_='tm-article-snippet')
+            snip = art
             #если сниппет пустой - мы в рекламной вставке на новость компании. Пропускаем
-            if snip is None:
+            if art.find('div', class_='tm-article-snippet') is None:
                 continue
             info = {'id': art['id']}
             info.update({
@@ -381,6 +381,9 @@ class HabrArticleDownloader():
                 })
             info.update({
                 'titleMD5': hashlib.md5(info['title'].encode("utf-8")).hexdigest()
+                })
+            info.update({
+                'bookmarked_count': int(snip.find('span', class_='bookmarks-button__counter').text)
                 })
             if info['url'].startswith('/ru/'):
                 info['url'] = HABR_TITLE + info['url']
@@ -431,10 +434,11 @@ class HabrArticleDownloader():
         profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
         G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
         G.add_nodes_from( [(x['titleMD5'],{
-            'title':x['title'], 'author': x['author'],
+            'title':x['title'], 'author': x['author'], 'article_id':x['id'],
             'localName': (nickname + '/' + self.dir_cor_name(x['title']) + '.html') if type_articles == 'b' else None ,
             'group':'post', 'shape':'circle', 'size': 1,
-            'url': x['url']
+            'url': x['url'], 'bookmarked_count': x['bookmarked_count'],
+            'pubdate': x['date']
             }) for x in profile['bookmarks']])
         G.add_node(
             nickname,
