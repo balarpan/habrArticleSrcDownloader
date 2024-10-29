@@ -176,11 +176,13 @@ window.addEventListener('load', function () {
   const container = document.getElementById('mynetwork');
   network = new vis.Network(container, { nodes: nodesView, edges: edgesView }, visjs_options);
 
+
   network.on("stabilizationProgress", function (params) {
     const progress = document.getElementById('netprogress');
     const value = parseInt(params.iterations / params.total * 100)
     progress.style.setProperty("--progressbar", `${value}%`);
   });
+
 
   network.once("stabilizationIterationsDone", function () {
     const progress = document.getElementById('netprogress');
@@ -191,6 +193,26 @@ window.addEventListener('load', function () {
     }.bind(null,progress), 500);
     //in case we opened with browser "back button" which stores history of input values
     author_srchbox.dispatchEvent(new Event("input"));
+
+    //graph settings pane
+    const net_cnt = document.getElementById('mynetwork-cnt');
+    let settings_pane = document.createElement('div');
+    settings_pane.className = 'graph-settings';
+    settings_pane.innerHTML = '<div class="checkbox-cnt"><input type="checkbox" id="phys-toggle">Симуляция физики</div>';
+    net_cnt.prepend(settings_pane);
+    const phys_toggle = document.getElementById('phys-toggle');
+    phys_toggle.checked = visjs_options.physics.enabled;
+    phys_toggle.addEventListener("input", (e) => {
+      network.setOptions( { physics: e.target.checked } );
+    });
+  });
+
+
+  network.on("configChange", function() {
+    const phys_toggle = document.getElementById('phys-toggle');
+    if (!phys_toggle)
+      return;
+    phys_toggle.checked = network.options.physics;
   });
 
   network.on("select", function (params) {

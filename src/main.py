@@ -472,7 +472,7 @@ class HabrArticleDownloader():
     </style>
 </HEAD>
 <BODY>
-<div class="mynetwork_cnt">
+<div id="mynetwork-cnt" class="mynetwork_cnt">
   <div id="netprogress" class="progressbar_cnt"><div class="progressbar"></div></div>
   <div id="mynetwork"></div>
 </div>

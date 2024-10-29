@@ -1,3 +1,7 @@
+:root {
+  --checkbox-height: 0.9rem;
+}
+
 /* progress bar */
 @property --progressbar {
   syntax: "<length>";
@@ -126,4 +130,44 @@
 		content: url(img/bookmark-fill.svg);
 		color: #257c74; fill: #257c74;
 	}
+}
+
+.graph-settings { position: absolute; left: 1.2rem; top: 1rem; z-index: 500; height: max-content; }
+/* fancy checkboxes */
+.checkbox-cnt { position:relative; height: var(--checkbox-height); line-height: var(--checkbox-height); }
+.checkbox-cnt input[type="checkbox"] {
+    background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
+                      -webkit-linear-gradient(left, #f66 50%, #6cf 50%);
+    background-size: 100% 100%, 200% 100%;
+    background-position: 0 0, 15px 0;
+    border-radius: 25px;
+    box-shadow: inset 0 1px 4px hsla(0,0%,0%,.5),
+                inset 0 0 10px hsla(0,0%,0%,.5),
+                0 0 0 1px hsla(0,0%,0%,.1),
+                0 -1px 2px 2px hsla(0,0%,0%,.25),
+                0 2px 2px 2px hsla(0,0%,100%,.75);
+    cursor: pointer;
+    height: var(--checkbox-height);
+    padding-right: 25px;
+    width: 75px;
+    -webkit-appearance: none;
+    -webkit-transition: .25s;
+    &:after {
+        background-color: #eee;
+        background-image: -webkit-linear-gradient(hsla(0,0%,100%,.1), hsla(0,0%,0%,.1));
+        border-radius: 25px;
+        box-shadow: inset 0 1px 1px 1px hsla(0,0%,100%,1),
+                    inset 0 -1px 1px 1px hsla(0,0%,0%,.25),
+                    0 1px 3px 1px hsla(0,0%,0%,.5),
+                    0 0 2px hsla(0,0%,0%,.25);
+        content: '';
+        display: block;
+        height: var(--checkbox-height);
+        width: 50px;
+    }
+    &:checked {
+        background-position: 0 0, 35px 0;
+        padding-left: 25px;
+        padding-right: 0;
+    }
 }
