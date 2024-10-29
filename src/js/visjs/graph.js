@@ -73,7 +73,6 @@ var visjs_options = {
     barnesHut: {
       gravitationalConstant: -2000,
       centralGravity: 0.3,
-      // springLength: 95,
       springLength: 95,
       springConstant: 0.07,
       damping: 0.09,
@@ -103,11 +102,11 @@ var visjs_options = {
     },
     maxVelocity: 50,
     minVelocity: 0.1,
-    solver: 'barnesHut',
+    solver: 'repulsion',
     stabilization: {
       enabled: true,
       iterations: 500,
-      updateInterval: 100,
+      updateInterval: 10,
       onlyDynamicEdges: false,
       fit: true
     },
@@ -128,7 +127,7 @@ var visjs_options = {
   interaction: { navigationButtons: false },
   // configure: { enabled: false },
   layout: { 
-    // randomSeed:42,
+    randomSeed:0.6154292573936662,
     improvedLayout: false
   }
 };
@@ -195,7 +194,7 @@ window.addEventListener('load', function () {
     author_srchbox.dispatchEvent(new Event("input"));
 
     //graph settings pane
-    const net_cnt = document.getElementById('mynetwork-cnt');
+    const net_cnt = document.getElementById('graph-stngs');
     let settings_pane = document.createElement('div');
     settings_pane.className = 'graph-settings';
     settings_pane.innerHTML = '<div class="checkbox-cnt"><input type="checkbox" id="phys-toggle">Симуляция физики</div>';

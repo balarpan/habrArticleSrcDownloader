@@ -486,6 +486,7 @@ class HabrArticleDownloader():
       <div class="srch-results-cnt ni-bump-pane"><div id="author-srch-res" class="srch-results"></div></div>
     </div>
     <div class="ni-pane sel-info-pane">
+      <div id="graph-stngs" class="graph-stngs-cnt ni-bump-pane"></div>
       <div id="selnodeinfo" class="ni-bump-pane"></div>
     </div>
 
