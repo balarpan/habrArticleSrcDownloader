@@ -150,6 +150,11 @@ figure figcaption {
     text-align: center;
     white-space: pre-wrap;
 }
+body_version-2 .floating-image:after {
+    content: "";
+    display: block;
+    clear: both;
+}
 
 formatted-body_version-2 details {
     background: #f7f7f7;
@@ -526,6 +531,7 @@ div.dl-info time {
 }
 
 /* spoiler  */
+.spoiler{clear:both;}
 .spoiler .spoiler_title {
     margin-top: 12px;
     text-decoration: underline;
@@ -698,6 +704,19 @@ div.dl-info time {
   color: #6667a3;
   text-decoration: none;
 }
+
+}
+.article-formatted-body h1, .article-formatted-body h2, .article-formatted-body h3, .article-formatted-body h4, .article-formatted-body h5, .article-formatted-body h6 {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-family: Fira Sans, sans-serif;
+    font-weight: 500;
+}
+.article-formatted-body_version-2 h3, .article-formatted-body_version-2 h4 {
+    margin-top: 32px;
+}
+
+.article-formatted-body_version-2 p+p {margin-top:24px;display:block;}
 
 :lang(ru) {
     quotes: "«" "»";
