@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import os
 import shutil
@@ -7,7 +7,7 @@ import argparse
 import re
 import requests
 import markdownify
-import multiprocessing
+# import multiprocessing
 # from lxml import html as lhtml
 import html
 import math
@@ -17,7 +17,6 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import warnings
 from bs4 import XMLParsedAsHTMLWarning
-warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 from datetime import datetime
 
 import concurrent.futures
@@ -25,6 +24,8 @@ import concurrent.futures
 import networkx as nx
 import json
 import hashlib
+
+warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 
 DIR_ARCTICLE = 'article'
 DIR_FAVORITES = 'favorites'
@@ -53,15 +54,16 @@ def callback(el):
     try:
         soup = BeautifulSoup(str(el), features='html.parser')
         return soup.find('code')['class'][0]
-    except:
+    except Exception:
         return None
+
 
 def imgDownload(url: str, file: str, chdir: str = None):
     """Download single image. file - filename. chdir (optional) - directory for saving file."""
     try:
         img_data = requests.get(url).content
         if chdir:
-            filename = os.path.join(chdir,file)
+            filename = os.path.join(chdir, file)
         else:
             filename = file
 
@@ -73,7 +75,7 @@ def imgDownload(url: str, file: str, chdir: str = None):
 
 def copy_jsdir(dir):
     # скопируем в папку dir файлы js и css если это не было сделано ранее
-    ddir = os.path.join(dir,'js')
+    ddir = os.path.join(dir, 'js')
     try:
         if not os.path.exists(ddir):
             shutil.copytree(
@@ -83,6 +85,7 @@ def copy_jsdir(dir):
                 dirs_exist_ok=True)
     except OSError:
         print("[error]: Ошибка копирования директории: {}".format(ddir))
+
 
 def copy_visjs(dir):
     """copy necessary vis.js scripts, css, options, etc."""
@@ -135,10 +138,10 @@ class HabrArticleDownloader():
             fd.write(_HTML_BEGIN_)
             fd.write("<title>" + html.escape(orig_title) + "</title>\n")
             if self._metadata:
-                for k,v in self._metadata.items():
+                for k, v in self._metadata.items():
                     fd.write('<meta property="hdl_' + html.escape(k) + '" content="' + html.escape(v) + '" />\n')
             fd.write("</head>\n<body>\n\n")
-            fd.write(self.dwnl_div + '<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">' + html.escape(orig_title) +'</h1>')
+            fd.write(self.dwnl_div + '<div class="tm-page-width">\n<h1 class="tm-title tm-title_h1">' + html.escape(orig_title) + '</h1>')
             fd.write(text)
             fd.write('</div>\n<script>hljs.highlightAll();</script>\n</body></html>')
         copy_jsdir('.')
@@ -164,7 +167,7 @@ class HabrArticleDownloader():
             return markdownify.markdownify(str(url_soup), heading_style="ATX", code_language_callback=callback)
 
     def get_article(self, url, name=None) -> str:
-        if not args.quiet and name in (None,'s'):
+        if not args.quiet and name in (None, 's'):
             print(f"[info]: Скачиваем {url}")
         try:
             r = requests.get(url)
@@ -199,7 +202,7 @@ class HabrArticleDownloader():
                 'author_country_code': article_author[len(article_author) - 4],
                 'post_date': article_createtime,
                 'article_id': re.search(r'(?:/)(\d+)(?:/?)$', url).group(1)
-                }
+            }
             meta_cmd = [
             ("orig_title", "url_soup.find('h1', 'tm-title tm-title_h1').string"),
             ("origin_src_url", "url_soup.find('a', 'tm-article-presenter__origin-link').get('href')"),
@@ -210,8 +213,8 @@ class HabrArticleDownloader():
             ("company_location", "url_soup.find('dt', 'tm-description-list__title', string='Местоположение').find_next_siblings('dd').string")]
             for meta in meta_cmd:
                 try:
-                   self._metadata[meta[0]] = eval(meta[1])
-                except Exception as ex:
+                    self._metadata[meta[0]] = eval(meta[1])
+                except Exception:
                     pass
 
             if 'orig_title' not in self._metadata:
@@ -225,7 +228,7 @@ class HabrArticleDownloader():
                     self._metadata['author_country_code'],
                     self._metadata['author_type'],
                     self._metadata['author']
-                    ]) + '/'
+                ]) + '/'
                 self.dwnl_div = f"\n<div class='dl-info-cnt'>\
                 <div class='dl-info' data-article-id='{self._metadata['article_id']}' data-title-first-c='{name[0]}'><dl>\n\
                 <dt>Url</dt><dd><a href='{url}'>{url}</a></dd>\n\
@@ -236,15 +239,15 @@ class HabrArticleDownloader():
                 elif 'company_name' in self._metadata:
                     self.dwnl_div += '<dt>Компания</dt><dd><span class="company_name">' + html.escape(self._metadata['company_name']) + '</span></dd>\n'
                 self.dwnl_div += "</dl></div></div>\n"
-        except:
+        except Exception:
             print("[error]: Ошибка получения метаданных статьи: ", url)
 
-        #заменим абсолютные ссылки на разделы в тексте (#) на относительные
+        # заменим абсолютные ссылки на разделы в тексте (#) на относительные
         a_re = re.compile(r'/(#[^/]+)$')
         for post in posts:
             for a in post.findAll('a', href=a_re):
                 link = a.get('href')
-                a['href'] = a['href'].replace( link, re.search(a_re, link).group(1))
+                a['href'] = a['href'].replace(link, re.search(a_re, link).group(1))
 
         for post in posts:
             if args.local_pictures:
@@ -298,11 +301,11 @@ class HabrArticleDownloader():
                     if os.path.exists(link_dst):
                         continue
 
-                    mp_tasks.update( {link_dst: executor.submit(imgDownload, link_url, link_dst)} )
+                    mp_tasks.update({link_dst: executor.submit(imgDownload, link_url, link_dst)})
             while True:
                 tsk_status = concurrent.futures.wait(mp_tasks.values(), timeout=2)
                 if 0 == len(tsk_status.not_done):
-                    break;
+                    break
                 print("Ожидание %i изображений  \r" % len(tsk_status.not_done), end='')
 
     def save_video(self, video, article_name):
@@ -315,7 +318,6 @@ class HabrArticleDownloader():
         """type_aticles: ['publications', 'bookmarks', 's', 'followers']"""
         r = requests.get(url)
         url_soup = BeautifulSoup(r.text, 'lxml')
-        #spans = url_soup.find_all("span", {"class": "tm-tabs__tab-counter"})
         spans = url_soup.find_all("span", {"class": "tm-tabs__tab-item"})
         
         if type_articles == 'publications':
@@ -335,9 +337,9 @@ class HabrArticleDownloader():
         _baseurl = '/'.join([HABR_TITLE, 'ru', 'users', nickname])
         pub_url = _baseurl + '/publications/articles/'
         fav_url = _baseurl + '/bookmarks/articles/'
-        follow_url = _baseurl + '/followers/'
-        _info = {'publications':[], 'bookmarks': []}
-        #own publications
+        # follow_url = _baseurl + '/followers/'
+        _info = {'publications': [], 'bookmarks': []}
+        # own publications
         _info['publications'] = self.userProfileArticleSubScan(pub_url, 'publications')
         _info['bookmarks'] = self.userProfileArticleSubScan(fav_url, 'bookmarks')
         return _info
@@ -354,7 +356,7 @@ class HabrArticleDownloader():
                 print(f"[error]: Ошибка получения страницы из списка статей: {page_url}")
                 continue
             url_soup = BeautifulSoup(r.text, 'lxml')
-            snipppets = url_soup.find('div', {'class':'tm-articles-list'}).findAll('article', {'class':'tm-articles-list__item'})
+            snipppets = url_soup.find('div', {'class': 'tm-articles-list'}).findAll('article', {'class': 'tm-articles-list__item'})
             _ret += self.parseArticleSnippets(snipppets)
         return _ret
 
@@ -363,28 +365,28 @@ class HabrArticleDownloader():
         _ret = []
         for art in bs:
             snip = art
-            #если сниппет пустой - мы в рекламной вставке на новость компании. Пропускаем
+            # если сниппет пустой - мы в рекламной вставке на новость компании. Пропускаем
             if art.find('div', class_='tm-article-snippet') is None:
                 continue
             info = {'id': art['id']}
             info.update({
                 'author': snip.find('div', class_='tm-article-snippet__meta-container').find('a', class_='tm-user-info__username').text.strip()
-                })
+            })
             info.update({
                 'date': snip.find('div', class_='tm-article-snippet__meta-container').find('time').get('datetime')[:10]
-                })
+            })
             info.update({
                 'url': snip.find('a', class_='tm-title__link').get('href')
-                })
+            })
             info.update({
                 'title': snip.find('a', class_='tm-title__link').find('span').text.strip()
-                })
+            })
             info.update({
                 'titleMD5': hashlib.md5(info['title'].encode("utf-8")).hexdigest()
-                })
+            })
             info.update({
                 'bookmarked_count': int(snip.find('span', class_='bookmarks-button__counter').text)
-                })
+            })
             if info['url'].startswith('/ru/'):
                 info['url'] = HABR_TITLE + info['url']
             # hub_link = snip.findAll('a', class_='tm-publication-hub__link')
@@ -394,7 +396,6 @@ class HabrArticleDownloader():
 
             _ret += [info]
         return _ret
-
 
     def main(self, nickname, dir, type_articles):
         # создаем папку для статей
@@ -414,14 +415,14 @@ class HabrArticleDownloader():
                 print(f"[info]: Статья ({art_index}/{len(pubs)}) {art['title']}")
                 try:
                     self.get_article(art['url'], art['title'])
-                except Exception as e:
+                except Exception:
                     print(f"[error]: Ошибка обработки {art['url']}")
             os.chdir('../')
 
         print("[info]: Построение графа связей")
         _graph_file = os.path.join('graph', 'graph.json')
         try:
-            if os.path.exists( _graph_file):
+            if os.path.exists(_graph_file):
                 with open(_graph_file) as json_data:
                     G = nx.node_link_graph(json.load(json_data), edges="edges", source="from", target="to")
             else:
@@ -430,29 +431,29 @@ class HabrArticleDownloader():
             print(f"[error]: Ошибка чтения ранее сохраненного графа {_graph_file}")
             print(e)
             G = nx.DiGraph()
-        #удаляем закладки на самого себя, чтоб избежать петель в графе
+        # удаляем закладки на самого себя, чтоб избежать петель в графе
         profile['bookmarks'] = [x for x in profile['bookmarks'] if x['author'] != nickname]
-        G.add_nodes_from( [(x['author'],{'label':x['author'], 'group':'author'}) for x in profile['bookmarks']])
-        G.add_nodes_from( [(x['titleMD5'],{
-            'title':x['title'], 'author': x['author'], 'article_id':x['id'],
-            'localName': (nickname + '/' + self.dir_cor_name(x['title']) + '.html') if type_articles == 'b' else None ,
-            'group':'post', 'shape':'circle', 'size': 1,
+        G.add_nodes_from([(x['author'], {'label':x['author'], 'group': 'author'}) for x in profile['bookmarks']])
+        G.add_nodes_from([(x['titleMD5'], {
+            'title': x['title'], 'author': x['author'], 'article_id': x['id'],
+            'localName': (nickname + '/' + self.dir_cor_name(x['title']) + '.html') if type_articles == 'b' else None,
+            'group': 'post', 'shape': 'circle', 'size': 1,
             'url': x['url'], 'bookmarked_count': x['bookmarked_count'],
             'pubdate': x['date']
-            }) for x in profile['bookmarks']])
+        }) for x in profile['bookmarks']])
         G.add_node(
             nickname,
             label=nickname, group='author',
             title=f'Публикаций:{len(profile["publications"])}<br/>Закладок:{len(profile["bookmarks"])}')
         # G.add_edges_from( [(nickname,x['author']) for x in profile['bookmarks']] )
-        G.add_edges_from( [(nickname,x['titleMD5'], {'relation':'bookmark', 'title':'закладка'}) for x in profile['bookmarks']] )
-        G.add_edges_from( [(x['titleMD5'],x['author'], {'relation':'post_author','color': {'inherit': True}}) for x in profile['bookmarks']] )
+        G.add_edges_from([(nickname, x['titleMD5'], {'relation': 'bookmark', 'title': 'закладка'}) for x in profile['bookmarks']])
+        G.add_edges_from([(x['titleMD5'], x['author'], {'relation': 'post_author', 'color': {'inherit': True}}) for x in profile['bookmarks']])
         self.create_dir('graph')
-        self.create_dir(os.path.join('graph','js'))
+        self.create_dir(os.path.join('graph', 'js'))
         # nx.write_adjlist(G, os.path.join('graph', 'test.adjlist'))
         gdata = nx.node_link_data(G, edges="edges", source="from", target="to")
         with open(_graph_file, "w", encoding="UTF-8") as fd:
-            fd.write( json.dumps(gdata) )
+            fd.write(json.dumps(gdata))
         with open(os.path.join('graph', 'js', 'graph_data.js'), "w", encoding="UTF-8") as fd:
             fd.write('"use strict";\n\n')
             fd.write('var graph_json = ' + json.dumps(gdata))
@@ -493,8 +494,7 @@ class HabrArticleDownloader():
 </div>
 </BODY>
 </HTML>""")
-        copy_visjs(os.path.join('.','graph'))
-
+        copy_visjs(os.path.join('.', 'graph'))
 
 
 class IndexBuilder():
@@ -507,9 +507,9 @@ class IndexBuilder():
         soup = BeautifulSoup(open(file, encoding="utf8"), 'lxml')
         metadata = [
             (x, soup.find('meta', {'property': str('hdl_' + x)}))
-            for x in ['author', 'url','post_date','author_country_code','author_type', 'orig_title', 'origin_src_url',
-                'company_name','company_profile_url', 'company_site', 'company_site_url', 'is_company_blog']]
-        metadata = [(x,v.attrs['content']) for x,v in metadata if v]
+            for x in ['author', 'url', 'post_date', 'author_country_code', 'author_type', 'orig_title', 'origin_src_url',
+                'company_name', 'company_profile_url', 'company_site', 'company_site_url', 'is_company_blog']]
+        metadata = [(x, v.attrs['content']) for x, v in metadata if v]
         metadata = metadata + [('file', os.path.basename(file)), ('title', soup.find('title').string)]
         metadata = dict(metadata)
         if 'orig_title' not in metadata or not metadata['orig_title']:
@@ -521,8 +521,8 @@ class IndexBuilder():
     def authorsInDir(self, dirpath='.'):
         a_list = [
             os.path.join(dirpath,f) for f in natsort.os_sorted(os.listdir(dirpath))
-                if os.path.isdir(os.path.join(dirpath,f)) and f != 'js' and f != 'graph'
-            ]
+                if os.path.isdir(os.path.join(dirpath, f)) and f != 'js' and f != 'graph'
+        ]
         return [os.path.basename(p) for p in a_list]
 
     def articlesInDir(self, dirpath='.'):
@@ -537,12 +537,12 @@ class IndexBuilder():
         src_articles = self.articlesInDir(dirpath)
         _articles = []
         for file in src_articles:
-            _articles.append( self.fileMetadata(file) )
+            _articles.append(self.fileMetadata(file))
         return _articles
 
     def make_index(self, dirpath='.', with_authors_list=True):
         self._articles = self.articlesMetaInDir(dirpath)
-        with open(os.path.join(dirpath,"index.html"), "w", encoding="UTF-8") as fd:
+        with open(os.path.join(dirpath, "index.html"), "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write('</head><body>\n\n')
             fd.write('<div class="art_index_cnt"><p class="art_index_h1">Перечень статей:</p>\n')
@@ -607,19 +607,19 @@ class IndexBuilder():
 
     def indexCatalogue(self, dirpath='.'):
         """Top-level index.html for -u and -b run args"""
-        a_list = natsort.natsorted( self.authorsInDir(dirpath) )
+        a_list = natsort.natsorted(self.authorsInDir(dirpath))
         print("[info]: Построение индексов для %i каталогов авторов" % len(a_list))
         a_meta = {}
         for author in a_list:
-            a_file = self.articlesInDir(dirpath=os.path.join(dirpath,author))
+            a_file = self.articlesInDir(dirpath=os.path.join(dirpath, author))
             if a_file and len(a_file):
                 a_meta.update({author: self.fileMetadata(a_file[0])})
                 a_meta[author]['article_count'] = len(a_file)
             self.make_index(dirpath=author, with_authors_list=False)
-        with open(os.path.join(dirpath,"index.html"), "w", encoding="UTF-8") as fd:
+        with open(os.path.join(dirpath, "index.html"), "w", encoding="UTF-8") as fd:
             fd.write(_HTML_BEGIN_)
             fd.write('</head><body>\n\n')
-            if os.path.exists(os.path.join('graph','index.html')):
+            if os.path.exists(os.path.join('graph', 'index.html')):
                 fd.write('<div class="graph_link"><a href="graph/index.html" target="_blank">Открыть граф связей</a></div>\n')
             fd.write('<div class="art_index_cnt authorsCatalogue"><p class="art_index_h1">Перечень авторов и количества статей:</p>\n')
 
@@ -698,7 +698,7 @@ if __name__ == '__main__':
             except Exception as ex:
                 print("[error]: Ошибка создания файла index.html")
                 print(ex)
-    except Exception as ex:
+    except Exception:
         import traceback
         print("[error]: Ошибка получения данных")
         print(traceback.format_exc())

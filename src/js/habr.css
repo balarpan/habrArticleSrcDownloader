@@ -133,7 +133,48 @@ ul.art_index li .post_date {
 /* эффект загнутого листа у списка авторов */
 /* ul.author_list ul.art_index {position: relative;transform: rotate(1deg);} */
 
+figure.float {
+    float: left;
+    max-width: 50%;
+    margin-right: 32px;
+    margin-top: 0;
+}
+figure.bordered {
+    border: 1px solid #c0c0c0;
+}
+figure figcaption {
+    color: var(--mountain-mist);
+    font-size: .8125rem;
+    line-height: 1.125rem;
+    margin-top: 4px;
+    text-align: center;
+    white-space: pre-wrap;
+}
 
+formatted-body_version-2 details {
+    background: #f7f7f7;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.article-formatted-body_version-2 summary {
+    color: #548eaa; cursor: pointer; display: block;
+    font-size: 1rem; line-height: 1.1875rem;
+    -webkit-hyphens: auto;
+    hyphens: auto; outline: 0; position: relative;
+    text-decoration: underline;
+    -webkit-text-decoration-style: dotted;
+    text-decoration-style: dotted; text-underline-position: under;
+    padding: 16px 36px; box-sizing: border-box; width: 100%;
+}
+.article-formatted-body_version-2 summary:before {
+    border-color: transparent transparent transparent #558eaa;
+    border-style: solid; border-width: 4px 0 4px 4px;
+    content: ""; height: 0; left: 24px;
+    position: absolute; top: 50%;
+    transform: translateY(-50%); transform-origin: 75% 25%;
+    transition: transform .1s linear; width: 0;
+}
+.article-formatted-body_version-2 details[open]>summary:before{transform:rotate(90deg)}
 .index_spoiler { display:block; }
 .index_spoiler_title {
     cursor: pointer;
